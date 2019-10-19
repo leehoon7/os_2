@@ -167,7 +167,7 @@ process_wait (tid_t child_tid UNUSED)
     if (child_tid == t->tid) {
       sema_down(&(t->child_lock));
       exit_status = t->exit_status;
-      list_remove(&(t->child_elem));
+      list_remove(&(t->childelem));
       sema_up(&(t->load));
       return exit_status;
     }

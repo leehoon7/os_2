@@ -39,8 +39,8 @@ static void
 syscall_handler (struct intr_frame *f UNUSED)
 {
   uint32_t *esp = f->esp;
-  printf ("system call! %d \n", *esp);
-  hex_dump(esp, esp, 300, true);
+//  printf ("system call! %d \n", *esp);
+//  hex_dump(esp, esp, 300, true);
 
   if(*esp == SYS_HALT){ // 0 : 핀토스 끄기
     my_halt();
@@ -52,7 +52,10 @@ syscall_handler (struct intr_frame *f UNUSED)
     thread_exit();
   }else if(*esp == SYS_EXEC){ // 2
     const char *cmd = (char)*(uint32_t *)(f->esp+4);
-    check_address(f->esp+4)
+//    printf("here");
+    check_address(f->esp+4);
+//    printf("here");
+//    printf("%s", cmd);
     f->eax = my_exec(cmd);
   }else if(*esp == SYS_WAIT){ // 3
     pid_t pid = (pid_t)*(uint32_t *)(f->esp+4);
