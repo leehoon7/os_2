@@ -232,9 +232,12 @@ unsigned my_tell(int fd){
 }
 
 void my_close(int fd){
+  struct file* fp;
   if (thread_current()->fd[fd] == NULL){
     my_exit(-1);
   }
+  fp = thread_current()->fd[fd];
+  thread_current()->fd[fd] = NULL
   return file_close(thread_current()->fd[fd]);
 }
 
