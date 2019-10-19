@@ -6,7 +6,7 @@
 
 /* my include */
 #include "devices/shutdown.h" // for SYS_HALT
-
+#include "userprog/process.h"
 static void syscall_handler (struct intr_frame *);
 
 void my_halt();
