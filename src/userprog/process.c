@@ -41,10 +41,10 @@ process_execute (const char *file_name)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
   strlcpy (fn_copy2, file_name, PGSIZE);
-  printf("\n%s\n", file_name);
+//  printf("\n%s\n", file_name);
   command = strtok_r(fn_copy2, " ", &save_ptr);
-  printf("%s\n\n", command);
-  printf("%s\n", fn_copy);
+//  printf("%s\n\n", command);
+//  printf("%s\n", fn_copy);
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (command, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
@@ -60,27 +60,27 @@ start_process (void *file_name_)
   char *file_name = file_name_;
   struct intr_frame if_;
   bool success;
-  printf("in start : %s\n", file_name);
+//  printf("in start : %s\n", file_name);
   
   char *file_name_copy;
   file_name_copy = palloc_get_page (0);
   strlcpy (file_name_copy, file_name, PGSIZE);
   char *command, *save_ptr;
   command = strtok_r(file_name_copy, " ", &save_ptr);
-  printf("in start - command : %s\n", command);
-  printf("file name : %s\n", file_name); 
+//  printf("in start - command : %s\n", command);
+//  printf("file name : %s\n", file_name); 
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
   success = load (command, &if_.eip, &if_.esp);
-  hex_dump(if_.esp, if_.esp, 200, true);
+//  hex_dump(if_.esp, if_.esp, 200, true);
   if (success){
-    printf("before : %p \n", &if_.esp);
+//    printf("before : %p \n", &if_.esp);
     push_argument(file_name, &if_.esp);    
   }
-  hex_dump(if_.esp, if_.esp, 200, true);
+//  hex_dump(if_.esp, if_.esp, 200, true);
   /* If load failed, quit. */
   palloc_free_page (file_name);
   if (!success) 
@@ -97,8 +97,8 @@ start_process (void *file_name_)
 }
 
 void push_argument(char *file_name, void **esp){
-  printf("%p", esp);
-  printf("in push argument .. : %s\n", file_name);
+//  printf("%p", esp);
+//  printf("in push argument .. : %s\n", file_name);
 
   const char **token_list = (const char**) palloc_get_page(0);
   int count = 0;
@@ -111,17 +111,17 @@ void push_argument(char *file_name, void **esp){
   for(token = strtok_r(temp_copy, " ", &save_ptr); token != NULL;
       token = strtok_r(NULL, " ", &save_ptr)){
     token_list[count] = token;
-    printf("%d, %s \n", count, token);
+//    printf("%d, %s \n", count, token);
     count++;
   }
-  printf("%s, %s, %s, %s, %s\n", token_list[0], token_list[1], token_list[2], token_list[3], token_list[4]);
+//  printf("%s, %s, %s, %s, %s\n", token_list[0], token_list[1], token_list[2], token_list[3], token_list[4]);
   //strlcpy (temp_copy, file_name, PGSIZE);
-  printf("new !! : %s\n", token);
+//  printf("new !! : %s\n", token);
   for(int i = count - 1 ; i >= 0; i--){
     int temp_len = strlen(token_list[i]) + 1;
     *esp -= temp_len;
     strlcpy(*esp, token_list[i], temp_len);
-    printf("here.. : %p, %s \n", esp, token_list[i]);
+  //  printf("here.. : %p, %s \n", esp, token_list[i]);
     len += temp_len;
     token_list[i] = *esp;
   }
@@ -142,7 +142,7 @@ void push_argument(char *file_name, void **esp){
   *esp -= 4;
   **(uint32_t **)esp = 0;
   
-  printf("-----\n\n\n");
+//  printf("-----\n\n\n");
 //  token_list = (char **)malloc(sizeof(char *) * count);
 }
 /* Waits for thread TID to die and returns its exit status.  If
@@ -157,7 +157,7 @@ void push_argument(char *file_name, void **esp){
 int
 process_wait (tid_t child_tid UNUSED) 
 {
-  while(1){}
+  for(int i = 0; i<1000000000; i++){}
   return -1;
 }
 
