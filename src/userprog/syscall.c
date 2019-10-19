@@ -125,7 +125,8 @@ bool my_filesize(int fd){
 
 int my_read(int fd, void *buffer, unsigned size){
   if (fd == 0){
-
+    //unsigned i;
+    //for(i = 0; i < size; i++)
   }
 }
 
