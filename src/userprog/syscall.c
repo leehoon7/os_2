@@ -70,7 +70,7 @@ syscall_handler (struct intr_frame *f UNUSED)
   }else if(*esp == SYS_READ){ // 8
     int fd = (int)*(uint32_t *)(f->esp+4);
     void *buf = (void *)*(uint32_t *)(f->esp+8);
-    unsigned size = (unsigned)*(uint32_t)(f->esp+12);
+    unsigned size = (unsigned)*(uint32_t *)(f->esp+12);
 
     f->eax = my_read(fd, buf, size);
   }else if(*esp == SYS_WRITE){ // 9
