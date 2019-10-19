@@ -20,16 +20,20 @@ syscall_handler (struct intr_frame *f UNUSED)
   uint32_t *esp = f->esp;
   printf ("system call! %d \n", *esp);
   hex_dump(esp, esp, 300, true);
-  if(*esp == 1){
+  
+  if(*esp == SYS_HALT){
+
+  }
+  else if(*esp == SYS_EXIT){
     //hex_dump(esp, esp, 300, true);
     printf("%s: exit(0)\n", thread_name());
     //printf("thread exit...\n");
     thread_exit();
-  }
-//  printf("%d", *esp);
-//  printf(" : %p \n", esp);
-//  printf ("system call!\n");
-  if(*esp == 9){
+  }else if(*esp == SYS_EXEC){
+
+  }else if(*esp == SYS_WAIT){
+
+  }else if(*esp == SYS_WRITE){
 //    printf("esp ::: %p \n", esp);
 //    printf("%d \n", (f->eax));
 //    hex_dump(esp, esp, 300, true);
