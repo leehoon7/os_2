@@ -82,10 +82,50 @@ int my_exit(int status){
   thread_exit();
 }
 
+pid_t my_exec(const char *cmd_line){
+
+}
+
+int my_wait(pid_t pid){
+
+}
+
+bool my_create(const char *file, unsigned initial_size){
+
+}
+
+bool my_remove(const char *file){
+
+}
+
+bool my_open(const char *file){
+
+}
+
+bool my_filesize(int fd){
+
+}
+
+int my_read(int fd, void *buffer, unsigned size){
+
+}
+
 int my_write(int fd, const void *buffer, unsigned size){
   if (fd == 1){
     putbuf(buffer, size);
     return size;
   }
   return -1;
+}
+
+void my_seek(int fd, unsigned position){
+
+}
+
+unsigned my_tell(int fd){
+
+}
+
+void my_close(int fd){
+
 }
