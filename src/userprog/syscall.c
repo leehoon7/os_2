@@ -8,6 +8,7 @@
 #include "devices/shutdown.h" // for SYS_HALT
 #include "userprog/process.h"
 #include "threads/vaddr.h" // for check_address : is_user_vaddr
+#include "filesys/filesys.h" // for SYS_CREATE, SYS_REMOVE
 static void syscall_handler (struct intr_frame *);
 
 /* functions for system call*/
@@ -54,7 +55,13 @@ syscall_handler (struct intr_frame *f UNUSED)
   }else if(*esp == SYS_WAIT){ // 3
 
   }else if(*esp == SYS_CREATE){ // 4
+    bool return_code;
 
+    const char *file = (char)*(uint32_t *)(f->esp+4);
+    unsigned initial_size = (unsigned)*(uint32_t *)(f->esp+8);
+
+    return_code = my_create(file, initial_size);
+    f->eax = return_code;
   }else if(*esp == SYS_REMOVE){ // 5
 
   }else if(*esp == SYS_OPEN){ // 6
@@ -100,7 +107,9 @@ int my_wait(pid_t pid){
 }
 
 bool my_create(const char *file, unsigned initial_size){
+  if(file == NULL) exit(-1);
 
+  return filesys_create(file, initial_size);
 }
 
 bool my_remove(const char *file){
