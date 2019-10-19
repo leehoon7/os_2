@@ -163,13 +163,19 @@ int my_wait(pid_t pid){
 bool my_create(const char *file, unsigned initial_size){
   if(file == NULL) my_exit(-1);
   check_address(file);
-  return filesys_create(file, initial_size);
+  lock_acquire(&file_lock);
+  bool return_code = filesys_create(file, initial_size);
+  lock_release(&file_lock);
+  return return_code
 }
 
 bool my_remove(const char *file){
   if(file == NULL) my_exit(-1);
   check_address(file);
-  return filesys_remove(file);
+  lock_acquire(&file_lock);
+  bool return_code = filesys_remove(file);
+  lock_release(&file_lock);
+  return return_code;
 }
 
 int my_open(const char *file){
@@ -196,10 +202,13 @@ int my_open(const char *file){
 }
 
 int my_filesize(int fd){
+  lock_acquire(&file_lock);
   if (thread_current()->fd[fd] == NULL){
     my_exit(-1);
   }
-  return file_length(thread_current()->fd[fd]);
+  int return_code = file_length(thread_current()->fd[fd]);
+  lock_release(&file_lock);
+  return return_code;
 }
 
 int my_read(int fd, void *buffer, unsigned size){
@@ -214,6 +223,7 @@ int my_read(int fd, void *buffer, unsigned size){
     }
   } else if (fd > 2){
     if (thread_current()->fd[fd] == NULL){
+      lock_release(&file_lock);
       my_exit(-1);
     }
     lock_release(&file_lock);
@@ -228,6 +238,7 @@ int my_write(int fd, const void *buffer, unsigned size){
   lock_acquire(&file_lock);
   if (fd == 1){
     putbuf(buffer, size);
+    lock_release(&file_lock);
     return size;
   } else if (fd > 2){
     if (thread_current()->fd[fd] == NULL){
