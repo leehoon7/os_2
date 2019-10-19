@@ -237,7 +237,7 @@ void my_close(int fd){
     my_exit(-1);
   }
   fp = thread_current()->fd[fd];
-  thread_current()->fd[fd] = NULL
+  thread_current()->fd[fd] = NULL;
   return file_close(thread_current()->fd[fd]);
 }
 
