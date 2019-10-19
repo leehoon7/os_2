@@ -39,8 +39,8 @@ static void
 syscall_handler (struct intr_frame *f UNUSED)
 {
   uint32_t *esp = f->esp;
-//  printf ("system call! %d \n", *esp);
-//  hex_dump(esp, esp, 300, true);
+  printf ("system call! %d \n", *esp);
+  hex_dump(esp, esp, 300, true);
  
   if(*esp == SYS_HALT){ // 0 : 핀토스 끄기
     my_halt();
@@ -112,10 +112,7 @@ int my_wait(pid_t pid){
 
 bool my_create(const char *file, unsigned initial_size){
   if(file == NULL) my_exit(-1);
-  //check_address(file);
-  if(is_kernel_vaddr(*file)){
-    my_exit(-1);
-  }
+  check_address(file);
   return filesys_create(file, initial_size);
 }
 
@@ -162,6 +159,7 @@ void my_close(int fd){
 
 // 유저가 이 주소를 사용할 수 없으면 : -1 status로 exit.
 void check_address(void *addr){
+  printf("%p", addr);
   if(!is_user_vaddr(addr)){
     my_exit(-1);
   }
