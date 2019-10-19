@@ -54,7 +54,9 @@ syscall_handler (struct intr_frame *f UNUSED)
     const char *cmd = (char)*(uint32_t *)(f->esp+4);
     f->eax = my_exec(cmd);
   }else if(*esp == SYS_WAIT){ // 3
-
+    pid_t pid = (pid_t)*(uint32_t *)(f->esp+4);
+    check_address(f->esp+4);
+    my_wait(pid);
   }else if(*esp == SYS_CREATE){ // 4
     bool return_code;
 
@@ -69,7 +71,7 @@ syscall_handler (struct intr_frame *f UNUSED)
   }else if(*esp == SYS_REMOVE){ // 5
     bool return_code;
     check_address(f->esp+4);
-    
+
     const char *file = (const char*)*(uint32_t *)(f->esp+4);
     return_code = my_remove(file);
   }else if(*esp == SYS_OPEN){ // 6
@@ -111,7 +113,7 @@ pid_t my_exec(const char *cmd_line){
 }
 
 int my_wait(pid_t pid){
-
+  process_wait(pid);
 }
 
 bool my_create(const char *file, unsigned initial_size){
