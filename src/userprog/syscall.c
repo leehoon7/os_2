@@ -62,7 +62,11 @@ syscall_handler (struct intr_frame *f UNUSED)
   }else if(*esp == SYS_FILESIZE){ // 7
 
   }else if(*esp == SYS_READ){ // 8
+    int fd = (int)*(uint32_t *)(f->esp+4);
+    void *buf = (void *)*(uint32_t *)(f->esp+8);
+    unsigned size = (unsigned)*(uint32_t)(f->esp+12);
 
+    f->eax = my_read(fd, buf, size);
   }else if(*esp == SYS_WRITE){ // 9
     int fd = (int)*(uint32_t *)(f->esp+4);
     const void *buf = (void *)*(uint32_t *)(f->esp+8);
@@ -112,7 +116,9 @@ bool my_filesize(int fd){
 }
 
 int my_read(int fd, void *buffer, unsigned size){
+  if (fd == 0){
 
+  }
 }
 
 int my_write(int fd, const void *buffer, unsigned size){
@@ -120,7 +126,7 @@ int my_write(int fd, const void *buffer, unsigned size){
     putbuf(buffer, size);
     return size;
   }
-  return -1;
+  return 0;
 }
 
 void my_seek(int fd, unsigned position){
@@ -135,6 +141,7 @@ void my_close(int fd){
 
 }
 
+// 유저가 이 주소를 사용할 수 없으면 : -1 status로 exit.
 void check_address(void *addr){
   if(!is_user_vaddr(addr)){
     my_exit(-1);
