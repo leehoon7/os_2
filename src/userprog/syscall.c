@@ -171,6 +171,9 @@ int my_open(const char *file){
   }
   for(int i = 3; i< 128; i++){
     if(thread_current()->fd[i] == NULL){
+      if (strcmp(thread_current()->name, file) == 0){
+        file_deny_write(fp);
+      }
       thread_current()->fd[i] = fp;
       return i;
     }
@@ -211,6 +214,9 @@ int my_write(int fd, const void *buffer, unsigned size){
   } else if (fd > 2){
     if (thread_current()->fd[fd] == NULL){
       my_exit(-1);
+    }
+    if (thread_current()->fd[fd]->deny_write){
+      file_deny_write(thread_current()->fd[fd]);
     }
     return file_write(thread_current()->fd[fd], buffer, size);
   }
