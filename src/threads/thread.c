@@ -471,7 +471,7 @@ init_thread (struct thread *t, const char *name, int priority)
   sema_init(&(t->child_lock), 0);
   sema_init(&(t->load), 0);
   list_init(&(t->child));
-  list_push_back (&(thread_current()->child), &(t->childelem));
+  list_push_back (&(running_thread()->child), &(t->childelem));
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
