@@ -45,6 +45,9 @@ process_execute (const char *file_name)
   command = strtok_r(fn_copy2, " ", &save_ptr);
 //  printf("%s\n\n", command);
 //  printf("%s\n", fn_copy);
+  if(filesys_open(command) == NULL){
+    return -1;
+  }
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (command, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
