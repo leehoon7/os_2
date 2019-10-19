@@ -51,7 +51,8 @@ syscall_handler (struct intr_frame *f UNUSED)
     my_exit(status);
     thread_exit();
   }else if(*esp == SYS_EXEC){ // 2
-
+    const char *cmd = (char)*(uint32_t *)(f->esp+4);
+    f->eax = my_exec(cmd);
   }else if(*esp == SYS_WAIT){ // 3
 
   }else if(*esp == SYS_CREATE){ // 4
@@ -98,7 +99,7 @@ int my_exit(int status){
 }
 
 pid_t my_exec(const char *cmd_line){
-
+  return process_execute(cmd_line);
 }
 
 int my_wait(pid_t pid){
@@ -125,9 +126,11 @@ bool my_filesize(int fd){
 
 int my_read(int fd, void *buffer, unsigned size){
   if (fd == 0){
-    //unsigned i;
-    //for(i = 0; i < size; i++)
+    for(int i; i < size; i++){
+
+    }
   }
+  return 0;
 }
 
 int my_write(int fd, const void *buffer, unsigned size){
