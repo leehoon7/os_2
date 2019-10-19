@@ -136,7 +136,7 @@ void my_exit(int status){
   thread_current() -> exit_status = status;
   for(int i = 3; i < 128; i++){
     if(thread_current()->fd[i] != NULL){
-      close(i);
+      my_close(i);
     }
   }
   thread_exit();
@@ -163,6 +163,8 @@ bool my_remove(const char *file){
 }
 
 int my_open(const char *file){
+  if(file == NULL) my_exit(-1);
+  check_address(file);
   struct file *fp = filesys_open(file);
   if (fp == '\0'){
     return -1;
@@ -177,11 +179,15 @@ int my_open(const char *file){
 }
 
 int my_filesize(int fd){
+  if (thread_current()->fd[fd] == NULL){
+    exit(-1);
+  }
   return file_length(thread_current()->fd[fd]);
 }
 
 int my_read(int fd, void *buffer, unsigned size){
   int i;
+  check_address(buffer);
   if (fd == 0){
     for(i = 0; i < size; i++){
       if(((char *)buffer)[i] == '\0'){
@@ -189,30 +195,46 @@ int my_read(int fd, void *buffer, unsigned size){
       }
     }
   } else if (fd > 2){
+    if (thread_current()->fd[fd] == NULL){
+      my_exit(-1);
+    }
     return file_read(thread_current()->fd[fd], buffer, size);
   }
   return i;
 }
 
 int my_write(int fd, const void *buffer, unsigned size){
+  check_address(buffer);
   if (fd == 1){
     putbuf(buffer, size);
     return size;
   } else if (fd > 2){
+    if (thread_current()->fd[fd] == NULL){
+      my_exit(-1);
+    }
     return file_write(thread_current()->fd[fd], buffer, size);
   }
   return -1;
 }
 
 void my_seek(int fd, unsigned position){
+  if (thread_current()->fd[fd] == NULL){
+    my_exit(-1);
+  }
   file_seek(thread_current()->fd[fd], position);
 }
 
 unsigned my_tell(int fd){
+  if (thread_current()->fd[fd] == NULL){
+    my_exit(-1);
+  }
   return file_tell(thread_current()->fd[fd]);
 }
 
 void my_close(int fd){
+  if (thread_current()->fd[fd] == NULL){
+    my_exit(-1);
+  }
   return file_close(thread_current()->fd[fd]);
 }
 
