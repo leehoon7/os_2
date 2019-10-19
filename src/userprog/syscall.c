@@ -67,7 +67,11 @@ syscall_handler (struct intr_frame *f UNUSED)
     return_code = my_create(file, initial_size);
     f->eax = return_code;
   }else if(*esp == SYS_REMOVE){ // 5
-
+    bool return_code;
+    check_address(f->esp+4);
+    
+    const char *file = (const char*)*(uint32_t *)(f->esp+4);
+    return_code = my_remove(file);
   }else if(*esp == SYS_OPEN){ // 6
 
   }else if(*esp == SYS_FILESIZE){ // 7
@@ -117,7 +121,9 @@ bool my_create(const char *file, unsigned initial_size){
 }
 
 bool my_remove(const char *file){
-
+  if(file == NULL) my_exit(-1);
+  check_address(file);
+  return filesys_remove(file);
 }
 
 bool my_open(const char *file){
