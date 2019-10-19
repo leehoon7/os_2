@@ -180,7 +180,7 @@ int my_open(const char *file){
 
 int my_filesize(int fd){
   if (thread_current()->fd[fd] == NULL){
-    exit(-1);
+    my_exit(-1);
   }
   return file_length(thread_current()->fd[fd]);
 }
