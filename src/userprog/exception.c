@@ -93,8 +93,8 @@ kill (struct intr_frame *f)
               thread_name (), f->vec_no, intr_name (f->vec_no));
       intr_dump_frame (f);
       printf("in myyyyyyy");
-      my_exit(-1);
-      //thread_exit ();
+      //my_exit(-1);
+      thread_exit ();
 
     case SEL_KCSEG:
       /* Kernel's code segment, which indicates a kernel bug.
@@ -109,8 +109,8 @@ kill (struct intr_frame *f)
          kernel. */
       printf ("Interrupt %#04x (%s) in unknown segment %04x\n",
              f->vec_no, intr_name (f->vec_no), f->cs);
-      //thread_exit ();
-      my_exit(-1);
+      thread_exit ();
+      //my_exit(-1);
     }
 }
 
