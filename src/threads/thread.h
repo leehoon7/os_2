@@ -107,7 +107,7 @@ struct thread
 
     struct semaphore child_lock;
     struct semaphore load;
-    int exit;
+    int exit_status;
 
 #endif
 
