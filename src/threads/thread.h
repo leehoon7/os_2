@@ -109,6 +109,8 @@ struct thread
     struct semaphore load;
     int exit_status;
 
+    struct file *fd[128];
+
 #endif
 
     /* Owned by thread.c. */

@@ -79,28 +79,51 @@ syscall_handler (struct intr_frame *f UNUSED)
 
     const char *file = (const char*)*(uint32_t *)(f->esp+4);
     return_code = my_remove(file);
+    f->eax = return_code;
   }else if(*esp == SYS_OPEN){ // 6
-
+    int return_code;
+    const char *file = (const char*)*(uint32_t *)(f->esp+4);
+    check_address(f->esp+4);
+    return_code = my_open(file);
+    f->eax = return_code;
   }else if(*esp == SYS_FILESIZE){ // 7
-
+    int return_code;
+    int fd = (int)*(uint32_t *)(f->esp+4);
+    check_address(f->esp+4);
+    return_code = my_filesize(fd);
+    f->eax = return_code;
   }else if(*esp == SYS_READ){ // 8
     int fd = (int)*(uint32_t *)(f->esp+4);
     void *buf = (void *)*(uint32_t *)(f->esp+8);
     unsigned size = (unsigned)*(uint32_t *)(f->esp+12);
-
+    check_address(f->esp+4);
+    check_address(f->esp+8);
+    check_address(f->esp+12);
     f->eax = my_read(fd, buf, size);
   }else if(*esp == SYS_WRITE){ // 9
     int fd = (int)*(uint32_t *)(f->esp+4);
     const void *buf = (void *)*(uint32_t *)(f->esp+8);
     unsigned size = (unsigned)*(uint32_t *)(f->esp+12);
-
+    check_address(f->esp+4);
+    check_address(f->esp+8);
+    check_address(f->esp+12);
     f->eax = my_write(fd, buf, size);
   }else if(*esp == SYS_SEEK){ // 10
-
+    int fd = (int)*(uint32_t *)(f->esp+4);
+    unsigned position = (unsigned)*(uint32_t *)(f->esp+8);
+    check_address(f->esp+4);
+    check_address(f->esp+8);
+    my_seek(fd, position);
   }else if(*esp == SYS_TELL){ // 11
-
+    unsigned return_code;
+    int fd = (int)*(uint32_t *)(f->esp+4);
+    check_address(f->esp+4);
+    return_code = my_tell(fd);
+    f->eax = return_code;
   }else if(*esp == SYS_CLOSE){ // 12
-
+    int fd = (int)*(uint32_t *)(f->esp+4);
+    check_address(f->esp+4);
+    my_close(fd);
   }
 }
 
