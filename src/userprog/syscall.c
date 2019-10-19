@@ -4,9 +4,15 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 
+/* my include */
+#include "devices/shutdown.h" // for SYS_HALT
+
 static void syscall_handler (struct intr_frame *);
 
-int write(int fd, const void *buffer, unsigned size);
+void my_halt();
+int my_exit(int status);
+int my_write(int fd, const void *buffer, unsigned size);
+
 
 void
 syscall_init (void)
@@ -22,10 +28,12 @@ syscall_handler (struct intr_frame *f UNUSED)
   hex_dump(esp, esp, 300, true);
 
   if(*esp == SYS_HALT){ // 0
-    halt();
+    my_halt();
   }
   else if(*esp == SYS_EXIT){ // 1
-    printf("%s: exit(0)\n", thread_name());
+    int status = (int)*(uint32_t *)(f->esp+4);
+
+    my_exit(status);
     thread_exit();
   }else if(*esp == SYS_EXEC){ // 2
 
@@ -45,7 +53,8 @@ syscall_handler (struct intr_frame *f UNUSED)
     int fd = (int)*(uint32_t *)(f->esp+4);
     const void *buf = (void *)*(uint32_t *)(f->esp+8);
     unsigned size = (unsigned)*(uint32_t *)(f->esp+12);
-    f->eax = write(fd, buf, size);
+
+    f->eax = my_write(fd, buf, size);
   }else if(*esp == SYS_SEEK){ // 10
 
   }else if(*esp == SYS_TELL){ // 11
@@ -55,7 +64,16 @@ syscall_handler (struct intr_frame *f UNUSED)
   }
 }
 
-int write(int fd, const void *buffer, unsigned size){
+void my_halt(){
+  shutdown_power_off();
+}
+
+int my_exit(int status){
+  printf("%s: exit(%d)\n", thread_name(), status);
+  thread_exit();
+}
+
+int my_write(int fd, const void *buffer, unsigned size){
   if (fd == 1){
     putbuf(buffer, size);
     return size;
