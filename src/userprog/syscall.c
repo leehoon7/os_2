@@ -41,7 +41,7 @@ syscall_handler (struct intr_frame *f UNUSED)
   uint32_t *esp = f->esp;
 //  printf ("system call! %d \n", *esp);
 //  hex_dump(esp, esp, 300, true);
-
+ 
   if(*esp == SYS_HALT){ // 0 : 핀토스 끄기
     my_halt();
   }
