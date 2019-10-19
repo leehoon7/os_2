@@ -18,8 +18,8 @@ pid_t my_exec(const char *cmd_line);
 int my_wait(pid_t pid);
 bool my_create(const char *file, unsigned initial_size);
 bool my_remove(const char *file);
-bool my_open(const char *file);
-bool my_filesize(int fd);
+int my_open(const char *file);
+int my_filesize(int fd);
 int my_read(int fd, void *buffer, unsigned size);
 int my_write(int fd, const void *buffer, unsigned size);
 void my_seek(int fd, unsigned position);
@@ -157,11 +157,11 @@ bool my_remove(const char *file){
   return filesys_remove(file);
 }
 
-bool my_open(const char *file){
+int my_open(const char *file){
 
 }
 
-bool my_filesize(int fd){
+int my_filesize(int fd){
 
 }
 
