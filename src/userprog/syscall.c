@@ -9,8 +9,14 @@
 #include "userprog/process.h"
 #include "threads/vaddr.h" // for check_address : is_user_vaddr
 #include "filesys/filesys.h" // for SYS_CREATE, SYS_REMOVE
-#include "filesys/file.h"
 static void syscall_handler (struct intr_frame *);
+
+struct file
+  {
+    struct inode *inode;        /* File's inode. */
+    off_t pos;                  /* Current position. */
+    bool deny_write;            /* Has file_deny_write() been called? */
+  };
 
 /* functions for system call*/
 void my_halt();
