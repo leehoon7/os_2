@@ -113,7 +113,7 @@ int my_wait(pid_t pid){
 bool my_create(const char *file, unsigned initial_size){
   if(file == NULL) my_exit(-1);
   //check_address(file);
-  if(!is_kernel_vaddr(addr)){
+  if(is_kernel_vaddr(*file)){
     my_exit(-1);
   }
   return filesys_create(file, initial_size);

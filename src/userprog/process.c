@@ -157,7 +157,7 @@ void push_argument(char *file_name, void **esp){
 int
 process_wait (tid_t child_tid UNUSED) 
 {
-  for(int i = 0; i<300000000; i++){}
+  for(int i = 0; i<1000000000; i++){}
   return -1;
 }
 
