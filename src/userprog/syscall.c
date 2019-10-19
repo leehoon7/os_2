@@ -134,6 +134,11 @@ void my_halt(){
 void my_exit(int status){
   printf("%s: exit(%d)\n", thread_name(), status);
   thread_current() -> exit_status = status;
+  for(int i = 3; i < 128; i++){
+    if(thread_current()->fd[i] != NULL){
+      close(i);
+    }
+  }
   thread_exit();
 }
 
@@ -158,40 +163,57 @@ bool my_remove(const char *file){
 }
 
 int my_open(const char *file){
-
+  struct file *fp = filesys_open(file);
+  if (fp == '\0'){
+    return -1;
+  }
+  for(int i = 3; i< 128; i++){
+    if(thread_current()->fd[i] == NULL){
+      thread_current()->fd[i] = fp;
+      return i;
+    }
+  }
+  return -1;
 }
 
 int my_filesize(int fd){
-
+  return file_length(thread_current()->fd[fd]);
 }
 
 int my_read(int fd, void *buffer, unsigned size){
+  int i;
   if (fd == 0){
-    for(int i = 0; i < size; i++){
-
+    for(i = 0; i < size; i++){
+      if(((char *)buffer)[i] == '\0'){
+        break;
+      }
     }
+  } else if (fd > 2){
+    return file_read(thread_current()->fd[fd], buffer, size);
   }
-  return 0;
+  return i;
 }
 
 int my_write(int fd, const void *buffer, unsigned size){
   if (fd == 1){
     putbuf(buffer, size);
     return size;
+  } else if (fd > 2){
+    return file_write(thread_current()->fd[fd], buffer, size);
   }
-  return 0;
+  return -1;
 }
 
 void my_seek(int fd, unsigned position){
-
+  file_seek(thread_current()->fd[fd], position);
 }
 
 unsigned my_tell(int fd){
-
+  return file_tell(thread_current()->fd[fd]);
 }
 
 void my_close(int fd){
-
+  return file_close(thread_current()->fd[fd]);
 }
 
 // 유저가 이 주소를 사용할 수 없으면 : -1 status로 exit.
