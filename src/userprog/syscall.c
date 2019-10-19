@@ -11,8 +11,17 @@ static void syscall_handler (struct intr_frame *);
 
 void my_halt();
 int my_exit(int status);
+pid_t my_exec(const char *cmd_line);
+int my_wait(pid_t pid);
+bool my_create(const char *file, unsigned initial_size);
+bool my_remove(const char *file);
+bool my_open(const char *file);
+bool my_filesize(int fd);
+int my_read(int fd, void *buffer, unsigned size);
 int my_write(int fd, const void *buffer, unsigned size);
-
+void my_seek(int fd, unsigned position);
+unsigned my_tell(int fd);
+void my_close(int fd);
 
 void
 syscall_init (void)
