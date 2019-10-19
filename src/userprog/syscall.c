@@ -58,6 +58,9 @@ syscall_handler (struct intr_frame *f UNUSED)
   }else if(*esp == SYS_CREATE){ // 4
     bool return_code;
 
+    check_address(f->esp+4);
+    check_address(f->esp+8);
+
     const char *file = (char)*(uint32_t *)(f->esp+4);
     unsigned initial_size = (unsigned)*(uint32_t *)(f->esp+8);
     return_code = my_create(file, initial_size);
@@ -108,7 +111,7 @@ int my_wait(pid_t pid){
 
 bool my_create(const char *file, unsigned initial_size){
   if(file == NULL) my_exit(-1);
-
+  check_address(file);
   return filesys_create(file, initial_size);
 }
 
