@@ -11,6 +11,8 @@
 #include "filesys/filesys.h" // for SYS_CREATE, SYS_REMOVE
 static void syscall_handler (struct intr_frame *);
 
+struct lock file_lock;
+
 struct file
   {
     struct inode *inode;        /* File's inode. */
@@ -39,6 +41,7 @@ void check_address(void *addr);
 void
 syscall_init (void)
 {
+  lock_init(&file_lock);
   intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
 }
 
@@ -172,8 +175,10 @@ bool my_remove(const char *file){
 int my_open(const char *file){
   if(file == NULL) my_exit(-1);
   check_address(file);
+  lock_acquire(&file_lock);
   struct file *fp = filesys_open(file);
   if (fp == '\0'){
+    lock_release(&file_lock);
     return -1;
   }
   for(int i = 3; i< 128; i++){
@@ -182,9 +187,11 @@ int my_open(const char *file){
         file_deny_write(fp);
       }
       thread_current()->fd[i] = fp;
+      lock_release(&file_lock);
       return i;
     }
   }
+  lock_release(&file_lock);
   return -1;
 }
 
@@ -198,6 +205,7 @@ int my_filesize(int fd){
 int my_read(int fd, void *buffer, unsigned size){
   int i;
   check_address(buffer);
+  lock_acquire(&file_lock);
   if (fd == 0){
     for(i = 0; i < size; i++){
       if(((char *)buffer)[i] == '\0'){
@@ -208,25 +216,31 @@ int my_read(int fd, void *buffer, unsigned size){
     if (thread_current()->fd[fd] == NULL){
       my_exit(-1);
     }
+    lock_release(&file_lock);
     return file_read(thread_current()->fd[fd], buffer, size);
   }
+  lock_release(&file_lock);
   return i;
 }
 
 int my_write(int fd, const void *buffer, unsigned size){
   check_address(buffer);
+  lock_acquire(&file_lock);
   if (fd == 1){
     putbuf(buffer, size);
     return size;
   } else if (fd > 2){
     if (thread_current()->fd[fd] == NULL){
+      lock_release(&file_lock);
       my_exit(-1);
     }
     if (thread_current()->fd[fd]->deny_write){
       file_deny_write(thread_current()->fd[fd]);
     }
+    lock_release(&file_lock);
     return file_write(thread_current()->fd[fd], buffer, size);
   }
+  lock_release(&file_lock);
   return -1;
 }
 
