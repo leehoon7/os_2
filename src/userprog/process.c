@@ -171,7 +171,7 @@ process_wait (tid_t child_tid UNUSED)
       sema_down(&(t->child_lock));
       exit_status = t->exit_status;
       list_remove(&(t->childelem));
-      //sema_up(&(t->load));
+      sema_up(&(t->load));
       return exit_status;
     }
   }
