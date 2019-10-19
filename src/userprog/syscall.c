@@ -13,7 +13,7 @@ static void syscall_handler (struct intr_frame *);
 
 /* functions for system call*/
 void my_halt();
-int my_exit(int status);
+void my_exit(int status);
 pid_t my_exec(const char *cmd_line);
 int my_wait(pid_t pid);
 bool my_create(const char *file, unsigned initial_size);
@@ -108,7 +108,7 @@ void my_halt(){
   shutdown_power_off();
 }
 
-int my_exit(int status){
+void my_exit(int status){
   printf("%s: exit(%d)\n", thread_name(), status);
   thread_current() -> exit_status = status;
   thread_exit();
