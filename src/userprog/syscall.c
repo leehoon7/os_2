@@ -7,8 +7,10 @@
 /* my include */
 #include "devices/shutdown.h" // for SYS_HALT
 #include "userprog/process.h"
+#include "threads/vaddr.h" // for check_address : is_user_vaddr
 static void syscall_handler (struct intr_frame *);
 
+/* functions for system call*/
 void my_halt();
 int my_exit(int status);
 pid_t my_exec(const char *cmd_line);
@@ -23,6 +25,9 @@ void my_seek(int fd, unsigned position);
 unsigned my_tell(int fd);
 void my_close(int fd);
 
+/* help function */
+void check_address(void *addr);
+
 void
 syscall_init (void)
 {
@@ -36,10 +41,10 @@ syscall_handler (struct intr_frame *f UNUSED)
   printf ("system call! %d \n", *esp);
   hex_dump(esp, esp, 300, true);
 
-  if(*esp == SYS_HALT){ // 0
+  if(*esp == SYS_HALT){ // 0 : 핀토스 끄기
     my_halt();
   }
-  else if(*esp == SYS_EXIT){ // 1
+  else if(*esp == SYS_EXIT){ // 1 :
     int status = (int)*(uint32_t *)(f->esp+4);
 
     my_exit(status);
@@ -128,4 +133,10 @@ unsigned my_tell(int fd){
 
 void my_close(int fd){
 
+}
+
+void check_address(void *addr){
+  if(!is_user_vaddr(addr)){
+    my_exit(-1);
+  }
 }
