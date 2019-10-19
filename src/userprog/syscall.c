@@ -18,7 +18,10 @@ static void
 syscall_handler (struct intr_frame *f UNUSED) 
 {
   uint32_t *esp = f->esp;
+  printf ("system call! %d \n", *esp);
+  hex_dump(esp, esp, 300, true);
   if(*esp == 1){
+    //hex_dump(esp, esp, 300, true);
     printf("%s: exit(0)\n", thread_name());
     //printf("thread exit...\n");
     thread_exit();
@@ -27,22 +30,21 @@ syscall_handler (struct intr_frame *f UNUSED)
 //  printf(" : %p \n", esp);
 //  printf ("system call!\n");
   if(*esp == 9){
-//    hex_dump(esp, esp, 1000, true);
-
-/*
-    int fd;
-    const void *buf;
-    unsigned size;
-    printf("%d", *(esp+1));
-    printf("%s", *(esp+2));
-    printf("%u", *(esp+3));
-    printf("\n\n, %p", (int)*(uint32_t *)(esp+4));
-    printf("\n\n, %p", (void *)*(uint32_t *)(esp+8));
-    printf("\n\n, %p", *(esp+12));
-    printf("good..");*/
-    f->eax = write((int)*(uint32_t *)(f->esp+20),
-(void *)*(uint32_t *)(f->esp+24),
-(unsigned)*((uint32_t *)(f->esp+28)));
+//    printf("esp ::: %p \n", esp);
+//    printf("%d \n", (f->eax));
+//    hex_dump(esp, esp, 300, true);
+    int fd = (int)*(uint32_t *)(f->esp+4);
+    const void *buf = (void *)*(uint32_t *)(f->esp+8);
+    unsigned size = (unsigned)*(uint32_t *)(f->esp+12);
+    f->eax = write(fd, buf, size);
+    //write(fd, buf, size);
+//    printf("%d  ", *(esp+1));
+//    printf("%s  ", *(esp+2));
+//    printf("%u  ", *(esp+3));
+   // printf("\n\n, %", (int)*(uint32_t *)(esp+4));
+   // printf("\n\n, %p", (void *)*(uint32_t *)(esp+8));
+   // printf("\n\n, %p", *(esp+12));
+  //  printf("good..");
   }
   //thread_exit ();
 }
@@ -52,6 +54,5 @@ int write(int fd, const void *buffer, unsigned size){
     putbuf(buffer, size);
     return size;
   }
-
   return -1;
 }
