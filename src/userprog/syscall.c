@@ -12,7 +12,6 @@
 static void syscall_handler (struct intr_frame *);
 
 struct lock file_lock;
-
 struct file
   {
     struct inode *inode;        /* File's inode. */
@@ -69,9 +68,11 @@ syscall_handler (struct intr_frame *f UNUSED)
 //    printf("hello.. \n\n");
     f->eax = my_exec(cmd);
   }else if(*esp == SYS_WAIT){ // 3
+    int return_code;
     pid_t pid = (pid_t)*(uint32_t *)(f->esp+4);
     check_address(f->esp+4);
-    f->eax = my_wait(pid);
+    return_code = my_wait(pid);
+    f->eax = return_code;
   }else if(*esp == SYS_CREATE){ // 4
     bool return_code;
 
@@ -185,13 +186,13 @@ int my_open(const char *file){
   check_address(file);
   lock_acquire(&file_lock);
   struct file *fp = filesys_open(file);
-  if (fp == '\0'){
+  if (fp == NULL){
     lock_release(&file_lock);
     return -1;
   }
   for(int i = 3; i< 128; i++){
     if(thread_current()->fd[i] == NULL){
-      if (strcmp(thread_current()->name, file) == 0){
+      if (!strcmp(thread_current()->name, file)){
         file_deny_write(fp);
       }
       thread_current()->fd[i] = fp;
@@ -204,38 +205,42 @@ int my_open(const char *file){
 }
 
 int my_filesize(int fd){
+  struct file *fp = thread_current()->fd[fd];
   lock_acquire(&file_lock);
-  if (thread_current()->fd[fd] == NULL){
+  if (fp == NULL){
     my_exit(-1);
   }
-  int return_code = file_length(thread_current()->fd[fd]);
+  int return_code = file_length(fp);
   lock_release(&file_lock);
   return return_code;
 }
 
 int my_read(int fd, void *buffer, unsigned size){
+  struct file *fp = thread_current()->fd[fd];
   int i;
   check_address(buffer);
   lock_acquire(&file_lock);
   if (fd == 0){
     for(i = 0; i < size; i++){
-      if(((char *)buffer)[i] == '\0'){
-        break;
+      if(((char *)buffer)[i] == NULL){
+	lock_release(&file_lock);
+	return ++i;
       }
     }
   } else if (fd > 2){
-    if (thread_current()->fd[fd] == NULL){
+    if (fp == NULL){
       lock_release(&file_lock);
       my_exit(-1);
     }
     lock_release(&file_lock);
-    return file_read(thread_current()->fd[fd], buffer, size);
+    return file_read(fp, buffer, size);
   }
   lock_release(&file_lock);
   return i;
 }
 
 int my_write(int fd, const void *buffer, unsigned size){
+  struct file *fp = thread_current()->fd[fd];
   check_address(buffer);
   lock_acquire(&file_lock);
   if (fd == 1){
@@ -243,42 +248,42 @@ int my_write(int fd, const void *buffer, unsigned size){
     lock_release(&file_lock);
     return size;
   } else if (fd > 2){
-    if (thread_current()->fd[fd] == NULL){
+    if (fp == NULL){
       lock_release(&file_lock);
       my_exit(-1);
-    }
-    if (thread_current()->fd[fd]->deny_write){
-      file_deny_write(thread_current()->fd[fd]);
+    }else if (fp->deny_write){
+      file_deny_write(fp);
     }
     lock_release(&file_lock);
-    return file_write(thread_current()->fd[fd], buffer, size);
+    return file_write(fp, buffer, size);
   }
   lock_release(&file_lock);
   return -1;
 }
 
 void my_seek(int fd, unsigned position){
-  if (thread_current()->fd[fd] == NULL){
+  struct file *fp = thread_current()->fd[fd];
+  if (fp == NULL){
     my_exit(-1);
   }
-  file_seek(thread_current()->fd[fd], position);
+  file_seek(fp, position);
 }
 
 unsigned my_tell(int fd){
-  if (thread_current()->fd[fd] == NULL){
+  struct file *fp = thread_current()->fd[fd];
+  if (fp == NULL){
     my_exit(-1);
   }
-  return file_tell(thread_current()->fd[fd]);
+  return file_tell(fp);
 }
 
 void my_close(int fd){
-  struct file* fp;
-  if (thread_current()->fd[fd] == NULL){
+  struct file *fp = thread_current()->fd[fd];
+  if (fp == NULL){
     my_exit(-1);
   }
-  fp = thread_current()->fd[fd];
-  thread_current()->fd[fd] = NULL;
-  return file_close(thread_current()->fd[fd]);
+  fp = NULL;
+  return file_close(fp);
 }
 
 // 유저가 이 주소를 사용할 수 없으면 : -1 status로 exit.

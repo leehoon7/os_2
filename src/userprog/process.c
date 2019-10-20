@@ -37,21 +37,28 @@ process_execute (const char *file_name)
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
   fn_copy2 = palloc_get_page (0);
-  if (fn_copy == NULL)
+  if (fn_copy == NULL){
+    palloc_free_page (fn_copy);
+    palloc_free_page (fn_copy2);
     return TID_ERROR;
+  }
   strlcpy (fn_copy, file_name, PGSIZE);
   strlcpy (fn_copy2, file_name, PGSIZE);
 //  printf("\n%s\n", file_name);
   command = strtok_r(fn_copy2, " ", &save_ptr);
 //  printf("%s\n\n", command);
 //  printf("%s\n", fn_copy);
-  if(filesys_open(command) == NULL){
+  if(filesys_open(command) == NULL){ 
+    palloc_free_page (fn_copy);
+    palloc_free_page (fn_copy2);
     return -1;
   }
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (command, PRI_DEFAULT, start_process, fn_copy);
-  if (tid == TID_ERROR)
+  if (tid == TID_ERROR){
     palloc_free_page (fn_copy);
+    palloc_free_page (fn_copy2);
+  }
   return tid;
 }
 
@@ -128,6 +135,7 @@ void push_argument(char *file_name, void **esp){
     len += temp_len;
     token_list[i] = *esp;
   }
+  palloc_free_page(temp_copy);
   if(len % 4 != 0){
     *esp -= 4 - (len % 4);
   }
@@ -138,6 +146,9 @@ void push_argument(char *file_name, void **esp){
     *esp -= 4;
     **(uint32_t **)esp = token_list[i];
   }
+
+  palloc_free_page(token_list);
+
   *esp -= 4;
   **(uint32_t **)esp = *esp + 4;
   *esp -= 4;
@@ -160,19 +171,17 @@ void push_argument(char *file_name, void **esp){
 int
 process_wait (tid_t child_tid UNUSED)
 {
-
-  struct thread *t;
-  int exit_status;
-
+  struct list *child = &(thread_current()->child);
   struct list_elem *e;
-  for (e = list_begin(&(thread_current()->child)); e != list_end(&(thread_current()->child)); e = list_next(e)) {
-    t = list_entry(e, struct thread, childelem);
-    if (child_tid == t->tid) {
+  for (e = list_begin(child); e != list_end(child); e = list_next(e)) {
+    struct thread *t = list_entry(e, struct thread, childelem);
+    bool have_to_wait = child_tid == t->tid ;
+    if (have_to_wait) {
       sema_down(&(t->child_lock));
-      exit_status = t->exit_status;
+      int pass_status = t->exit_status;
       list_remove(&(t->childelem));
       sema_up(&(t->load));
-      return exit_status;
+      return pass_status;
     }
   }
   return -1;
