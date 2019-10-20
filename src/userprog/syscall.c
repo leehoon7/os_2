@@ -166,7 +166,7 @@ bool my_create(const char *file, unsigned initial_size){
   lock_acquire(&file_lock);
   bool return_code = filesys_create(file, initial_size);
   lock_release(&file_lock);
-  return return_code
+  return return_code;
 }
 
 bool my_remove(const char *file){
