@@ -153,11 +153,13 @@ void my_exit(int status){
 }
 
 pid_t my_exec(const char *cmd_line){
-  return process_execute(cmd_line);
+  pid_t return_code = process_execute(cmd_line);
+  return return_code;
 }
 
 int my_wait(pid_t pid){
-  return process_wait(pid);
+  int return_code = process_wait(pid);
+  return return_code;
 }
 
 bool my_create(const char *file, unsigned initial_size){
