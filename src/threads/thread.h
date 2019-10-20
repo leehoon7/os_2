@@ -98,18 +98,16 @@ struct thread
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
-
+    int exit_status;
     tid_t par_tid;
+
     struct list_elem childelem;
     struct list child;
-
-    bool has_memory;
-
     struct semaphore child_lock;
     struct semaphore load;
-    int exit_status;
-
     struct file *fd[128];
+
+    bool has_memory;
 
 #endif
 
