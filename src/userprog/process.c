@@ -55,6 +55,7 @@ process_execute (const char *file_name)
   }
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (command, PRI_DEFAULT, start_process, fn_copy);
+  sema_down(&thread_current()->load);
   if (tid == TID_ERROR){
     palloc_free_page (fn_copy);
     palloc_free_page (fn_copy2);
@@ -93,7 +94,11 @@ start_process (void *file_name_)
 //  hex_dump(if_.esp, if_.esp, 200, true);
   /* If load failed, quit. */
   palloc_free_page (file_name);
+<<<<<<< HEAD
 
+=======
+  sema_up(&thread_current()->parent->load);
+>>>>>>> 867b46524763c2431a0e65608698c359390393c6
   if (!success)
     thread_exit ();
 
