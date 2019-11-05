@@ -94,11 +94,7 @@ start_process (void *file_name_)
 //  hex_dump(if_.esp, if_.esp, 200, true);
   /* If load failed, quit. */
   palloc_free_page (file_name);
-<<<<<<< HEAD
-
-=======
   sema_up(&thread_current()->parent->load);
->>>>>>> 867b46524763c2431a0e65608698c359390393c6
   if (!success)
     thread_exit ();
 
