@@ -208,6 +208,7 @@ int my_filesize(int fd){
   struct file *fp = thread_current()->fd[fd];
   lock_acquire(&file_lock);
   if (fp == NULL){
+    lock_release(&file_lock);
     my_exit(-1);
   }
   int return_code = file_length(fp);
@@ -223,8 +224,8 @@ int my_read(int fd, void *buffer, unsigned size){
   if (fd == 0){
     for(i = 0; i < size; i++){
       if(((char *)buffer)[i] == NULL){
-	lock_release(&file_lock);
-	return ++i;
+      	lock_release(&file_lock);
+      	return ++i;
       }
     }
   } else if (fd > 2){
