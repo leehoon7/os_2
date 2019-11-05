@@ -10,7 +10,7 @@
 #include "threads/vaddr.h" // for check_address : is_user_vaddr
 #include "filesys/filesys.h" // for SYS_CREATE, SYS_REMOVE
 static void syscall_handler (struct intr_frame *);
-
+ 
 struct lock file_lock;
 struct file
   {
@@ -190,6 +190,9 @@ int my_open(const char *file){
     lock_release(&file_lock);
     return -1;
   }
+  if(!strcmp(thread_current()->name, file)){
+    file_deny_write(fp);
+  }
   for(int i = 3; i< 128; i++){
     if(thread_current()->fd[i] == NULL){
       if (!strcmp(thread_current()->name, file)){
@@ -283,8 +286,9 @@ void my_close(int fd){
   if (fp == NULL){
     my_exit(-1);
   }
-  fp = NULL;
-  return file_close(fp);
+  struct file *temp = thread_current()->fd[fd];
+  thread_current()->fd[fd] = NULL;
+  return file_close(temp);
 }
 
 // 유저가 이 주소를 사용할 수 없으면 : -1 status로 exit.
