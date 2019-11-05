@@ -99,8 +99,8 @@ struct thread
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
     int exit_status;
-    tid_t par_tid;
 
+    struct thread* parent;
     struct list_elem childelem;
     struct list child;
     struct semaphore child_lock;
