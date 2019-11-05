@@ -48,7 +48,7 @@ process_execute (const char *file_name)
   command = strtok_r(fn_copy2, " ", &save_ptr);
 //  printf("%s\n\n", command);
 //  printf("%s\n", fn_copy);
-  if(filesys_open(command) == NULL){ 
+  if(filesys_open(command) == NULL){
     palloc_free_page (fn_copy);
     palloc_free_page (fn_copy2);
     return -1;
@@ -93,6 +93,7 @@ start_process (void *file_name_)
 //  hex_dump(if_.esp, if_.esp, 200, true);
   /* If load failed, quit. */
   palloc_free_page (file_name);
+
   if (!success)
     thread_exit ();
 
