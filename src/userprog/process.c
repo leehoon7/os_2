@@ -490,21 +490,43 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
   ASSERT (pg_ofs (upage) == 0);
   ASSERT (ofs % PGSIZE == 0);
 
+  struct vm_entry *vme;
+  struct file *reopen_file = file_reopen(file);
   file_seek (file, ofs);
+
   while (read_bytes > 0 || zero_bytes > 0)
     {
+
+      vme = malloc(sizeof(struct vm_entry));
+      if(vme == NULL){
+        return false;
+      }
       /* Calculate how to fill this page.
          We will read PAGE_READ_BYTES bytes from FILE
          and zero the final PAGE_ZERO_BYTES bytes. */
       size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
-      /* Get a page of memory. */
+      vme->file = reopen_file;
+  	  vme->offset = ofs;
+  	  vme->vaddr = upage;
+  	  vme->read_bytes = page_read_bytes;
+  	  vme->zero_bytes = page_zero_bytes;
+  	  vme->writable = writable;
+  	  vme->is_loaded = false;
+  	  vme->type = VM_BIN;
+
+      insert_vme(&thread_current()->vm, vme);
+
+      //vme->pinned = false;
+
+      /*
+      // Get a page of memory.
       uint8_t *kpage = palloc_get_page (PAL_USER);
       if (kpage == NULL)
         return false;
 
-      /* Load this page. */
+      // Load this page.
       if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
         {
           palloc_free_page (kpage);
@@ -512,17 +534,19 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
         }
       memset (kpage + page_read_bytes, 0, page_zero_bytes);
 
-      /* Add the page to the process's address space. */
+      // Add the page to the process's address space.
       if (!install_page (upage, kpage, writable))
         {
           palloc_free_page (kpage);
           return false;
         }
+      */
 
       /* Advance. */
       read_bytes -= page_read_bytes;
       zero_bytes -= page_zero_bytes;
       upage += PGSIZE;
+      ofs += page_read_bytes;
     }
   return true;
 }
