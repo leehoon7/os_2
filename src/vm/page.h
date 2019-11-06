@@ -1,3 +1,5 @@
+#include "threads/thread.h"
+
 #define VM_BIN 0
 #define VM_FILE 1
 #define VM_ANON 2

@@ -41,5 +41,12 @@ void vm_destroy(struct hash *vm){
 }
 
 static void destruct(struct hash_elem *e, void *aux UNUSED){
-  //미완성
+  struct vm_entry *vme = hash_entry(e, struct vm_entry, elem);
+  void* phys_addr;
+  if(vme->is_loaded){
+    phys_addr = pagedir_get_page(thread_current()->pagedir, vme->vaddr);
+    free_page(phys_addr);
+    pagedir_clear_page(thread_current()->pagedir, vme->vaddr);
+  }
+  free(vme);
 }
