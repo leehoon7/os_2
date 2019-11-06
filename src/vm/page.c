@@ -9,12 +9,14 @@ void vm_init(struct hash *vm){
 static unsigned vm_hash_func(const struct hash_elem *e, void *aux){
   struct vm_entry *h = hash_entry(e, struct vm_entry, elem);
   return hash_int((int)h->vaddr);
+  // return hash_int(h->vaddr);
 }
 
 static bool vm_less_func(const struct hash_elem *a, const struct hash_elem *b){
   struct vm_entry *ha = hash_entry(a, struct vm_entry, elem);
   struct vm_entry *hb = hash_entry(b, struct vm_entry, elem);
   return (int)(ha->vaddr) < (int)(hb->vaddr);
+  // return (ha->vaddr < hb->vaddr);
 }
 
 bool insert_vme(struct hash *vm, struct vm_entry *vme){
