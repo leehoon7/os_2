@@ -515,8 +515,8 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       vme->file = reopen_file;
 
       vme->offset = ofs;
-  	  vme->read_bytes = page_read_bytes;
-  	  vme->zero_bytes = page_zero_bytes;
+      vme->read_bytes = page_read_bytes;
+      vme->zero_bytes = page_zero_bytes;
 
       insert_vme(&thread_current()->vm, vme);
 
