@@ -507,14 +507,16 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
+      vme->type = VM_BIN;
+      vme->vaddr = upage;
+      vme->writable = writable;
+
+      vme->is_loaded = false;
       vme->file = reopen_file;
-  	  vme->offset = ofs;
-  	  vme->vaddr = upage;
+
+      vme->offset = ofs;
   	  vme->read_bytes = page_read_bytes;
   	  vme->zero_bytes = page_zero_bytes;
-  	  vme->writable = writable;
-  	  vme->is_loaded = false;
-  	  vme->type = VM_BIN;
 
       insert_vme(&thread_current()->vm, vme);
 
