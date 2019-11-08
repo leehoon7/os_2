@@ -1,5 +1,4 @@
 #include "vm/page.h"
-
 #include "hash.h"
 
 void vm_init(struct hash *vm){

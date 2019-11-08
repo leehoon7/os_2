@@ -1,3 +1,6 @@
+#ifndef VM_PAGE_H
+#define VM_PAGE_H
+
 #include "threads/thread.h"
 
 #define VM_BIN 0
@@ -22,7 +25,7 @@ struct vm_entry{
   size_t swap_slot;
 
   struct hash_elem elem;
-}
+};
 
 void vm_init(struct hash *vm);
 static unsigned vm_hash_func(const struct hash_elem *e, void *aux);
@@ -34,3 +37,5 @@ bool delete_vme(struct hash *vm, struct vm_entry *vme);
 struct vm_entry *find_vme(void *vaddr);
 void vm_destroy(struct hash *vm);
 static void destruct(struct hash_elem *e, void *aux UNUSED);
+
+#endif
