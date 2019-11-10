@@ -51,6 +51,7 @@ void vm_destroy(struct hash *vm){
   hash_destroy(vm, destruct);
 }
 
+//미완성 free_page
 static void destruct(struct hash_elem *e, void *aux UNUSED){
   struct vm_entry *vme = hash_entry(e, struct vm_entry, elem);
   void* phys_addr;
