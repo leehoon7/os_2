@@ -1,7 +1,6 @@
 #ifndef USERPROG_PROCESS_H
 #define USERPROG_PROCESS_H
 
-#include "threads/thread.h"
 #include "vm/page.h"
 
 typedef int pid_t;

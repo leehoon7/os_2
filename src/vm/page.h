@@ -38,5 +38,3 @@ bool delete_vme(struct hash *vm, struct vm_entry *vme);
 struct vm_entry *find_vme(void *vaddr);
 void vm_destroy(struct hash *vm);
 static void destruct(struct hash_elem *e, void *aux UNUSED);
-
-#endif
