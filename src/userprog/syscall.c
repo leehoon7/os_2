@@ -36,8 +36,12 @@ unsigned my_tell(int fd);
 void my_close(int fd);
 
 /* help function */
+<<<<<<< HEAD
 void check_address(void *addr);
 void check_valid_buffer(void* buffer, unsigned size, void* esp, bool to_write);
+=======
+void check_address(void *addr, void *esp);
+>>>>>>> 26ea1b1c3aadf7d20427e50e5c26eb4d768db056
 
 void
 syscall_init (void)
@@ -58,13 +62,13 @@ syscall_handler (struct intr_frame *f UNUSED)
   }
   else if(*esp == SYS_EXIT){ // 1 :
     int status = (int)*(uint32_t *)(f->esp+4);
-    check_address(f->esp+4);
+    check_address(f->esp+4, esp);
     my_exit(status);
     thread_exit();
   }else if(*esp == SYS_EXEC){ // 2
     const char *cmd = (const char*)*(uint32_t *)(f->esp+4);
 //    printf("here");
-    check_address(f->esp+4);
+    check_address(f->esp+4, esp);
 //    printf("here %p \n", cmd);
 //    printf("our command : %s \n\n", cmd);
 //    printf("hello.. \n\n");
@@ -72,14 +76,14 @@ syscall_handler (struct intr_frame *f UNUSED)
   }else if(*esp == SYS_WAIT){ // 3
     int return_code;
     pid_t pid = (pid_t)*(uint32_t *)(f->esp+4);
-    check_address(f->esp+4);
+    check_address(f->esp+4, esp);
     return_code = my_wait(pid);
     f->eax = return_code;
   }else if(*esp == SYS_CREATE){ // 4
     bool return_code;
 
-    check_address(f->esp+4);
-    check_address(f->esp+8);
+    check_address(f->esp+4, esp);
+    check_address(f->esp+8, esp);
 
     const char *file = (const char*)*(uint32_t *)(f->esp+4);
     unsigned initial_size = (unsigned)*(uint32_t *)(f->esp+8);
@@ -88,7 +92,7 @@ syscall_handler (struct intr_frame *f UNUSED)
     f->eax = return_code;
   }else if(*esp == SYS_REMOVE){ // 5
     bool return_code;
-    check_address(f->esp+4);
+    check_address(f->esp+4, esp);
 
     const char *file = (const char*)*(uint32_t *)(f->esp+4);
     return_code = my_remove(file);
@@ -96,46 +100,46 @@ syscall_handler (struct intr_frame *f UNUSED)
   }else if(*esp == SYS_OPEN){ // 6
     int return_code;
     const char *file = (const char*)*(uint32_t *)(f->esp+4);
-    check_address(f->esp+4);
+    check_address(f->esp+4, esp);
     return_code = my_open(file);
     f->eax = return_code;
   }else if(*esp == SYS_FILESIZE){ // 7
     int return_code;
     int fd = (int)*(uint32_t *)(f->esp+4);
-    check_address(f->esp+4);
+    check_address(f->esp+4, esp);
     return_code = my_filesize(fd);
     f->eax = return_code;
   }else if(*esp == SYS_READ){ // 8
     int fd = (int)*(uint32_t *)(f->esp+4);
     void *buf = (void *)*(uint32_t *)(f->esp+8);
     unsigned size = (unsigned)*(uint32_t *)(f->esp+12);
-    check_address(f->esp+4);
-    check_address(f->esp+8);
-    check_address(f->esp+12);
+    check_address(f->esp+4, esp);
+    check_address(f->esp+8, esp);
+    check_address(f->esp+12, esp);
     f->eax = my_read(fd, buf, size);
   }else if(*esp == SYS_WRITE){ // 9
     int fd = (int)*(uint32_t *)(f->esp+4);
     const void *buf = (void *)*(uint32_t *)(f->esp+8);
     unsigned size = (unsigned)*(uint32_t *)(f->esp+12);
-    check_address(f->esp+4);
-    check_address(f->esp+8);
-    check_address(f->esp+12);
+    check_address(f->esp+4, esp);
+    check_address(f->esp+8, esp);
+    check_address(f->esp+12, esp);
     f->eax = my_write(fd, buf, size);
   }else if(*esp == SYS_SEEK){ // 10
     int fd = (int)*(uint32_t *)(f->esp+4);
     unsigned position = (unsigned)*(uint32_t *)(f->esp+8);
-    check_address(f->esp+4);
-    check_address(f->esp+8);
+    check_address(f->esp+4, esp);
+    check_address(f->esp+8, esp);
     my_seek(fd, position);
   }else if(*esp == SYS_TELL){ // 11
     unsigned return_code;
     int fd = (int)*(uint32_t *)(f->esp+4);
-    check_address(f->esp+4);
+    check_address(f->esp+4, esp);
     return_code = my_tell(fd);
     f->eax = return_code;
   }else if(*esp == SYS_CLOSE){ // 12
     int fd = (int)*(uint32_t *)(f->esp+4);
-    check_address(f->esp+4);
+    check_address(f->esp+4, esp);
     my_close(fd);
   }
 }
@@ -167,7 +171,7 @@ int my_wait(pid_t pid){
 
 bool my_create(const char *file, unsigned initial_size){
   if(file == NULL) my_exit(-1);
-  check_address(file);
+  //check_address(file);
   lock_acquire(&file_lock);
   bool return_code = filesys_create(file, initial_size);
   lock_release(&file_lock);
@@ -176,7 +180,7 @@ bool my_create(const char *file, unsigned initial_size){
 
 bool my_remove(const char *file){
   if(file == NULL) my_exit(-1);
-  check_address(file);
+  //check_address(file);
   lock_acquire(&file_lock);
   bool return_code = filesys_remove(file);
   lock_release(&file_lock);
@@ -185,7 +189,7 @@ bool my_remove(const char *file){
 
 int my_open(const char *file){
   if(file == NULL) my_exit(-1);
-  check_address(file);
+  //check_address(file);
   lock_acquire(&file_lock);
   struct file *fp = filesys_open(file);
   if (fp == NULL){
@@ -224,7 +228,7 @@ int my_filesize(int fd){
 int my_read(int fd, void *buffer, unsigned size){
   struct file *fp = thread_current()->fd[fd];
   int i;
-  check_address(buffer);
+  //check_address(buffer);
   lock_acquire(&file_lock);
   if (fd == 0){
     for(i = 0; i < size; i++){
@@ -247,7 +251,7 @@ int my_read(int fd, void *buffer, unsigned size){
 
 int my_write(int fd, const void *buffer, unsigned size){
   struct file *fp = thread_current()->fd[fd];
-  check_address(buffer);
+  //check_address(buffer);
   lock_acquire(&file_lock);
   if (fd == 1){
     putbuf(buffer, size);
@@ -294,12 +298,30 @@ void my_close(int fd){
 }
 
 // 유저가 이 주소를 사용할 수 없으면 : -1 status로 exit.
-void check_address(void *addr){
+void check_address(void *addr, void *esp){
 //  printf("in check address : %p\n", addr);
   //printf("vs ")
-  if(!is_user_vaddr(addr)){
+  if (addr < (void *)0x08048000 || addr >= (void *)0xc0000000){
     my_exit(-1);
   }
+
+  struct vm_entry *vme = find_vme(addr);
+  if(vme == NULL){
+    my_exit(-1);
+  }
+
+  // 완벽하지는 않음.
+  /*
+  if(find_vme(addr) == NULL){
+    exit(-1);
+  }
+  */
+
+
+  /*
+  if(!is_user_vaddr(addr)){
+    my_exit(-1);
+  }*/
 }
 
 void check_valid_buffer(void* buffer, unsigned size, void* esp, bool to_write){
