@@ -36,8 +36,9 @@ unsigned my_tell(int fd);
 void my_close(int fd);
 
 /* help function */
-void check_valid_buffer(void* buffer, unsigned size, void* esp, bool to_write);
 void check_address(void *addr, void *esp);
+void check_valid_buffer(void* buffer, unsigned size, void* esp, bool to_write);
+void check_valid_string(const void *str, void *esp);
 
 void
 syscall_init (void)
@@ -64,7 +65,10 @@ syscall_handler (struct intr_frame *f UNUSED)
   }else if(*esp == SYS_EXEC){ // 2
     const char *cmd = (const char*)*(uint32_t *)(f->esp+4);
 //    printf("here");
-    check_address(f->esp+4, esp);
+
+//    check_address(f->esp+4, esp);
+    check_valid_string((const void*)cmd, f->esp)
+
 //    printf("here %p \n", cmd);
 //    printf("our command : %s \n\n", cmd);
 //    printf("hello.. \n\n");
@@ -96,7 +100,8 @@ syscall_handler (struct intr_frame *f UNUSED)
   }else if(*esp == SYS_OPEN){ // 6
     int return_code;
     const char *file = (const char*)*(uint32_t *)(f->esp+4);
-    check_address(f->esp+4, esp);
+//    check_address(f->esp+4, esp);
+    check_valid_string(file, f->esp);
     return_code = my_open(file);
     f->eax = return_code;
   }else if(*esp == SYS_FILESIZE){ // 7
@@ -109,17 +114,19 @@ syscall_handler (struct intr_frame *f UNUSED)
     int fd = (int)*(uint32_t *)(f->esp+4);
     void *buf = (void *)*(uint32_t *)(f->esp+8);
     unsigned size = (unsigned)*(uint32_t *)(f->esp+12);
-    check_address(f->esp+4, esp);
-    check_address(f->esp+8, esp);
-    check_address(f->esp+12, esp);
+    // check_address(f->esp+4, esp);
+    // check_address(f->esp+8, esp);
+    // check_address(f->esp+12, esp);
+    check_valid_buffer((void*)buf, (unsigned)size, f->esp, true);
     f->eax = my_read(fd, buf, size);
   }else if(*esp == SYS_WRITE){ // 9
     int fd = (int)*(uint32_t *)(f->esp+4);
     const void *buf = (void *)*(uint32_t *)(f->esp+8);
     unsigned size = (unsigned)*(uint32_t *)(f->esp+12);
-    check_address(f->esp+4, esp);
-    check_address(f->esp+8, esp);
-    check_address(f->esp+12, esp);
+    // check_address(f->esp+4, esp);
+    // check_address(f->esp+8, esp);
+    // check_address(f->esp+12, esp);
+    check_valid_buffer((void*)buf, (unsigned)size, f->esp, false);
     f->eax = my_write(fd, buf, size);
   }else if(*esp == SYS_SEEK){ // 10
     int fd = (int)*(uint32_t *)(f->esp+4);
@@ -329,5 +336,14 @@ void check_valid_buffer(void* buffer, unsigned size, void* esp, bool to_write){
     if(vme != NULL && to_write && !vme->writable)
       my_exit(-1);
     buf++;
+  }
+}
+
+void check_valid_string(const void *str, void *esp){
+  char *str_ = (char*)str;
+  check_address((void*)str_, esp);
+  while(*str_){
+    str_++;
+    check_address(str_, esp);
   }
 }
