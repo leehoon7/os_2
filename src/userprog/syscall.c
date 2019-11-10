@@ -11,7 +11,7 @@
 #include "filesys/filesys.h" // for SYS_CREATE, SYS_REMOVE
 #include "vm/page.h"
 static void syscall_handler (struct intr_frame *);
- 
+
 struct lock file_lock;
 struct file
   {
@@ -37,6 +37,7 @@ void my_close(int fd);
 
 /* help function */
 void check_address(void *addr);
+void check_valid_buffer(void* buffer, unsigned size, void* esp, bool to_write);
 
 void
 syscall_init (void)
@@ -298,5 +299,16 @@ void check_address(void *addr){
   //printf("vs ")
   if(!is_user_vaddr(addr)){
     my_exit(-1);
+  }
+}
+
+void check_valid_buffer(void* buffer, unsigned size, void* esp, bool to_write){
+  struct vm_entry* vme;
+  char* buf = (char*)buffer;
+  for(int i=0; i<size; i++){
+    vme = check_address((void*)buf, esp);
+    if(vme != NULL && to_write && !vme->writable)
+      my_exit(-1);
+    buf++;
   }
 }
