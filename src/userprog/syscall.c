@@ -36,12 +36,8 @@ unsigned my_tell(int fd);
 void my_close(int fd);
 
 /* help function */
-<<<<<<< HEAD
-void check_address(void *addr);
 void check_valid_buffer(void* buffer, unsigned size, void* esp, bool to_write);
-=======
 void check_address(void *addr, void *esp);
->>>>>>> 26ea1b1c3aadf7d20427e50e5c26eb4d768db056
 
 void
 syscall_init (void)
