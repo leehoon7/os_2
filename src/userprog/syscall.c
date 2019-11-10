@@ -328,7 +328,8 @@ void check_valid_buffer(void* buffer, unsigned size, void* esp, bool to_write){
   struct vm_entry* vme;
   char* buf = (char*)buffer;
   for(int i=0; i<size; i++){
-    vme = check_address((void*)buf, esp);
+    check_address((void*)buf, esp);
+    vme = find_vme((void*)buf);
     if(vme != NULL && to_write && !vme->writable)
       my_exit(-1);
     buf++;
