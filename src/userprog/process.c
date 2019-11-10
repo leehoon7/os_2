@@ -569,6 +569,21 @@ setup_stack (void **esp)
       else
         palloc_free_page (kpage);
     }
+
+  struct vm_entry *vme;
+  vme = malloc(sizeof(struct vm_entry));
+  if(vme == NULL){
+    return false;
+  }
+  void *temp_vad = ((uint8_t *) PHYS_BASE) - PGSIZE;
+  vme -> vaddr = pg_round_down(temp_vad);
+  vme -> is_loaded = true;
+  vme -> writable = true;
+  vme -> type = VM_ANON;
+  vme -> pinned = true;
+
+  success = insert_vme(&thread_current()->vm, vme);
+
   return success;
 }
 
