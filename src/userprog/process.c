@@ -581,7 +581,6 @@ setup_stack (void **esp)
   vme -> is_loaded = true;
   vme -> writable = true;
   vme -> type = VM_ANON;
-  vme -> pinned = true;
 
   success = insert_vme(&thread_current()->vm, vme);
 

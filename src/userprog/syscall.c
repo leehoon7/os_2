@@ -297,12 +297,12 @@ void check_address(void *addr, void *esp){
 //  printf("in check address : %p\n", addr);
   //printf("vs ")
   if (addr < (void *)0x08048000 || addr >= (void *)0xc0000000){
-    exit(-1);
+    my_exit(-1);
   }
 
-  struct vm_entry vme = find_vme(addr);
+  struct vm_entry *vme = find_vme(addr);
   if(vme == NULL){
-    exit(-1);
+    my_exit(-1);
   }
 
   // 완벽하지는 않음.
