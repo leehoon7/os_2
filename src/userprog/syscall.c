@@ -67,7 +67,7 @@ syscall_handler (struct intr_frame *f UNUSED)
 //    printf("here");
 
 //    check_address(f->esp+4, esp);
-    check_valid_string((const void*)cmd, f->esp)
+    check_valid_string((const void*)cmd, f->esp);
 
 //    printf("here %p \n", cmd);
 //    printf("our command : %s \n\n", cmd);
