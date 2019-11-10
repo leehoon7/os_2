@@ -17,7 +17,6 @@
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
-//#include "vm/page.h"
 
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
@@ -81,7 +80,7 @@ start_process (void *file_name_)
   command = strtok_r(file_name_copy, " ", &save_ptr);
 //  printf("in start - command : %s\n", command);
 //  printf("file name : %s\n", file_name);
-  vm_init(&thread_current()->vm);
+  vm_init(&(thread_current()->vm));
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;

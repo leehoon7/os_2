@@ -1,7 +1,8 @@
 #ifndef VM_PAGE_H
 #define VM_PAGE_H
 
-#include "threads/thread.h"
+#include <hash.h>
+//#include "threads/thread.h"
 
 #define VM_BIN 0
 #define VM_FILE 1

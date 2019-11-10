@@ -1,5 +1,17 @@
+#include <string.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <threads/malloc.h>
+#include <threads/palloc.h>
+#include "filesys/file.h"
 #include "vm/page.h"
-#include "hash.h"
+#include "userprog/pagedir.h"
+#include "userprog/process.h"
+#include "userprog/syscall.h"
+#include "threads/thread.h"
+#include "threads/vaddr.h"
+#include "threads/synch.h"
+#include "lib/kernel/list.h"
 
 void vm_init(struct hash *vm){
   hash_init(vm, vm_hash_func, vm_less_func, NULL);
@@ -44,7 +56,7 @@ static void destruct(struct hash_elem *e, void *aux UNUSED){
   void* phys_addr;
   if(vme->is_loaded){
     phys_addr = pagedir_get_page(thread_current()->pagedir, vme->vaddr);
-    free_page(phys_addr);
+    //free_page(phys_addr);
     pagedir_clear_page(thread_current()->pagedir, vme->vaddr);
   }
   free(vme);
