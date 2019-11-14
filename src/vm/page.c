@@ -62,3 +62,21 @@ static void destruct(struct hash_elem *e, void *aux UNUSED){
   }
   free(vme);
 }
+
+bool load_file(void *kaddr, struct vm_entry *vme)
+{
+	bool result = false;
+  // int file_bytes = file_read_at(vme->file, kaddr, vme->read_bytes, vme->offset);
+  // int check_bytes = (int) (vme->read_bytes);
+  // if(check_bytes == file_bytes){
+  //    memset(kaddr + vme->read_bytes, 0, vme->zero_bytes);
+  //    return true;
+  // }
+  // return false;
+	if((int)vme->read_bytes == file_read_at(vme->file, kaddr, vme->read_bytes, vme->offset))
+	{
+		result = true;
+		memset(kaddr + vme->read_bytes, 0, vme->zero_bytes);
+	}
+	return result;
+}
