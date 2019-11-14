@@ -610,11 +610,11 @@ install_page (void *upage, void *kpage, bool writable)
 
 bool handle_mm_fault(struct vm_entry *vme){
   uint8_t *kaddr = palloc_get_page(PAL_USER);
-  vme->pinned = true;
+//  vme->pinned = true;
   if(vme->is_loaded)
     return false;
   if(!kaddr)
-    retrun false;
+    return false;
   switch(vme->type){
     case VM_BIN:
       if(!load_file(kaddr, vme) || !install_page(vme->vaddr, kaddr, vme->writable)){
