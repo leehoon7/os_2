@@ -41,7 +41,7 @@ bool delete_vme(struct hash *vm, struct vm_entry *vme){
 struct vm_entry *find_vme(void *vaddr){
   struct vm_entry vme;
   vme.vaddr = pg_round_down(vaddr);
-  struct hash_elem* helem = hash_find(&thread_current()->vm, &vme.elem);
+  struct hash_elem *helem = hash_find(&thread_current()->vm, &vme.elem);
   if(helem != NULL)
     return hash_entry(helem, struct vm_entry, elem);
   return NULL;

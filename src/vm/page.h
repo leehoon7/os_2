@@ -28,6 +28,13 @@ struct vm_entry{
   struct hash_elem elem;
 };
 
+struct mmap_file {
+  int mapid;
+  struct file* file;
+  struct list_elem elem;
+  struct list vme_list;
+}
+
 void vm_init(struct hash *vm);
 static unsigned vm_hash_func(const struct hash_elem *e, void *aux);
 static bool vm_less_func(const struct hash_elem *a, const struct hash_elem *b);
