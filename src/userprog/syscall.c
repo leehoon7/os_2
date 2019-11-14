@@ -362,7 +362,8 @@ int mmap(int fd, void *addr){
   if(mmap_file_entry == NULL)
     return -1;
 
-  struct file *mmap_file = file_reopen(process_get_file(fd));
+  //if(cur->fd[fd] != NULL)
+  struct file *mmap_file = file_reopen(cur->fd[fd]);
   if(mmap_file == NULL){
     printf("File reopen fail!\n");
     return -1;
@@ -455,7 +456,7 @@ void do_munmap(struct mmap_file* mmap_file){
 
 			pagedir_clear_page(cur->pagedir, vme->vaddr);
 
-			free_page(physical_address);
+			palloc_free_page(physical_address);
 		}
 
 		tmp = list_prev(element);
