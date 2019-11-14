@@ -363,13 +363,13 @@ int mmap(int fd, void *addr){
     return -1;
 
   //if(cur->fd[fd] != NULL)
+  struct thread *cur = thread_current();
   struct file *mmap_file = file_reopen(cur->fd[fd]);
   if(mmap_file == NULL){
     printf("File reopen fail!\n");
     return -1;
   }
 
-  struct thread *cur = thread_current();
   cur->mapid += 1;
   mmap_file_entry->mapid = cur->mapid;
 

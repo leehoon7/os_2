@@ -207,7 +207,7 @@ process_exit (void)
       my_close(cur->fd[i]);
   }
 
-  palloc_free_page(cur->fd);
+//  palloc_free_page(cur->fd);
 
   munmap(CLOSE_ALL);
   vm_destroy(&cur->vm);
