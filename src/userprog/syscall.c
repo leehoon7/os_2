@@ -41,7 +41,8 @@ void check_valid_buffer(void* buffer, unsigned size, void* esp, bool to_write);
 void check_valid_string(const void *str, void *esp);
 
 int mmap(int fd, void *addr);
-void mummap(mapid_t mapid);
+void munmap(mapid_t mapid);
+void do_munmap(struct mmap_file* mmap_file);
 
 void
 syscall_init (void)
@@ -352,6 +353,133 @@ void check_valid_string(const void *str, void *esp){
 }
 
 int mmap(int fd, void *addr){
+  struct thread *cur = thread_current();
+  struct mmap_file *mmap_file_entry;
+  struct vm_entry *vme;
+  struct file *mmap_file;
+  uint32_t file_len;
+  int32_t offset = 0;
+  void *virtual_address = addr;
+  size_t page_read_bytes;
+  size_t page_zero_bytes;
 
+  if((uint32_t)addr%PGSIZE != 0 || addr == NULL)
+  {
+    return -1;
+  }
+  mmap_file_entry = malloc(sizeof(struct mmap_file));
+  if(mmap_file_entry == NULL)
+    return -1;
+
+  mmap_file = file_reopen(process_get_file(fd));
+  if(mmap_file == NULL)
+  {
+    printf("File reopen fail!\n");
+    return -1;
+  }
+
+  cur->mapid += 1;
+  mmap_file_entry->mapid = cur->mapid;
+
+
+  list_init(&(mmap_file_entry->vme_list));
+
+  mmap_file_entry->file = mmap_file;
+  file_len = file_length(mmap_file);
+
+  while(file_len > 0)
+  {
+    vme = malloc(sizeof(struct vm_entry));
+    if(vme == NULL)
+      return -1;
+
+    page_read_bytes = file_len < PGSIZE ? file_len : PGSIZE;
+    page_zero_bytes = PGSIZE - page_read_bytes;
+
+    vme->type      = VM_FILE;
+    vme->vaddr     = virtual_address;
+    vme->writable  = true;
+    vme->is_loaded = false;
+    vme->pinned    = false;
+    vme->file      = mmap_file;
+    vme->offset    = offset;
+    vme->read_bytes= page_read_bytes;
+    vme->zero_bytes= page_zero_bytes;
+
+    if(insert_vme(&cur->vm, vme) == false)
+    {
+       return -1;
+    }
+
+    list_push_back(&(mmap_file_entry->vme_list), &(vme->mmap_elem));
+    file_len -= page_read_bytes;
+    offset += page_read_bytes;
+    virtual_address += PGSIZE;
+  }
+
+  list_push_back(&cur->mmap_list,&mmap_file_entry->elem);
+  return cur->mapid;
 }
-void mummap(mapid_t mapid);
+
+void munmap(mapid_t mapid){
+  struct mmap_file *map_file;
+  struct thread *cur = thread_current();
+  struct list_elem *element;
+  struct list_elem *tmp;
+
+  for(element = list_begin(&cur->mmap_list) ; element != list_end(&cur->mmap_list) ; element = list_next(element))
+  {
+    map_file = list_entry(element, struct mmap_file, elem);
+
+    if(mapping == CLOSE_ALL || map_file->mapid == mapping)
+    {
+      do_munmap(map_file);
+
+      file_close(map_file->file);
+
+      tmp = list_prev(element);
+      list_remove(element);
+      element = tmp;
+
+      free(map_file);
+      if(mapping != CLOSE_ALL)
+        break;
+    }
+  }
+}
+
+void do_munmap(struct mmap_file* mmap_file){
+  struct thread *cur = thread_current();
+	struct list_elem *element;
+	struct list_elem *tmp;
+	struct list *vm_list = &(mmap_file->vme_list);
+	struct vm_entry *vme;
+	void *physical_address;
+
+	for(element = list_begin(vm_list); element != list_end(vm_list); element = list_next(element))
+	{
+		vme = list_entry(element, struct vm_entry, mmap_elem);
+
+		if(vme->is_loaded == true)
+		{
+			physical_address = pagedir_get_page(cur->pagedir, vme->vaddr);
+
+			if(pagedir_is_dirty(cur->pagedir, vme->vaddr) == true)
+			{
+				lock_acquire(&file_lock);
+				file_write_at(vme->file, vme->vaddr, vme->read_bytes, vme->offset);
+				lock_release(&file_lock);
+			}
+
+			pagedir_clear_page(cur->pagedir, vme->vaddr);
+
+			free_page(physical_address);
+		}
+
+		tmp = list_prev(element);
+		list_remove(element);
+		element = tmp;
+
+		delete_vme(&cur->vm, vme);
+	}
+}
