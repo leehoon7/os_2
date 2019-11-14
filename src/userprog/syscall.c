@@ -40,6 +40,9 @@ void check_address(void *addr, void *esp);
 void check_valid_buffer(void* buffer, unsigned size, void* esp, bool to_write);
 void check_valid_string(const void *str, void *esp);
 
+int mmap(int fd, void *addr);
+void mummap(mapid_t mapid);
+
 void
 syscall_init (void)
 {
@@ -347,3 +350,8 @@ void check_valid_string(const void *str, void *esp){
     check_address(str_, esp);
   }
 }
+
+int mmap(int fd, void *addr){
+
+}
+void mummap(mapid_t mapid);
