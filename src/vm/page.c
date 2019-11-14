@@ -57,7 +57,7 @@ static void destruct(struct hash_elem *e, void *aux UNUSED){
   void* phys_addr;
   if(vme->is_loaded){
     phys_addr = pagedir_get_page(thread_current()->pagedir, vme->vaddr);
-    //free_page(phys_addr);
+    palloc_free_page(phys_addr);
     pagedir_clear_page(thread_current()->pagedir, vme->vaddr);
   }
   free(vme);
