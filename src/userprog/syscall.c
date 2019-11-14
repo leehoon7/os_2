@@ -148,6 +148,16 @@ syscall_handler (struct intr_frame *f UNUSED)
     int fd = (int)*(uint32_t *)(f->esp+4);
     check_address(f->esp+4, esp);
     my_close(fd);
+  }else if(*esp == SYS_MMAP){
+    int fd = (int)*(uint32_t *)(f->esp+4);
+    void *addr = (void *)*(uint32_t *)(f->esp+8);
+    check_address(f->esp+4, esp);
+    check_address(f->esp+8, esp);
+    f->eax = mmap(fd, addr);
+  }else if(*esp == SYS_MUNMAP){
+    mapid_t mapid = (mapid_t)*(uint32_t *)(f->esp+4);
+    check_address(f->esp+4, esp);
+    munmap(mapid);
   }
 }
 

@@ -203,11 +203,13 @@ process_exit (void)
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
   for(int i=2; i<128; i++){
-    if(cur->fd[i] != NULL)
+    if(cur->fd[i] != NULL){
       my_close(cur->fd[i]);
+      palloc_free_page(cur->fd[i]);
+    }
   }
 
-//  palloc_free_page(cur->fd);
+  //palloc_free_page(cur->fd);
 
   munmap(CLOSE_ALL);
   vm_destroy(&cur->vm);
