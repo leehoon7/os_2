@@ -364,31 +364,25 @@ int mmap(int fd, void *addr){
   size_t page_zero_bytes;
 
   if((uint32_t)addr%PGSIZE != 0 || addr == NULL)
-  {
     return -1;
-  }
   mmap_file_entry = malloc(sizeof(struct mmap_file));
   if(mmap_file_entry == NULL)
     return -1;
 
   mmap_file = file_reopen(process_get_file(fd));
-  if(mmap_file == NULL)
-  {
+  if(mmap_file == NULL){
     printf("File reopen fail!\n");
     return -1;
   }
-
   cur->mapid += 1;
   mmap_file_entry->mapid = cur->mapid;
-
 
   list_init(&(mmap_file_entry->vme_list));
 
   mmap_file_entry->file = mmap_file;
   file_len = file_length(mmap_file);
 
-  while(file_len > 0)
-  {
+  while(file_len > 0){
     vme = malloc(sizeof(struct vm_entry));
     if(vme == NULL)
       return -1;
@@ -406,10 +400,8 @@ int mmap(int fd, void *addr){
     vme->read_bytes= page_read_bytes;
     vme->zero_bytes= page_zero_bytes;
 
-    if(insert_vme(&cur->vm, vme) == false)
-    {
+    if(!insert_vme(&cur->vm, vme))
        return -1;
-    }
 
     list_push_back(&(mmap_file_entry->vme_list), &(vme->mmap_elem));
     file_len -= page_read_bytes;
@@ -427,12 +419,10 @@ void munmap(mapid_t mapid){
   struct list_elem *element;
   struct list_elem *tmp;
 
-  for(element = list_begin(&cur->mmap_list) ; element != list_end(&cur->mmap_list) ; element = list_next(element))
-  {
+  for(element = list_begin(&cur->mmap_list) ; element != list_end(&cur->mmap_list) ; element = list_next(element)){
     map_file = list_entry(element, struct mmap_file, elem);
 
-    if(mapping == CLOSE_ALL || map_file->mapid == mapping)
-    {
+    if(mapping == CLOSE_ALL || map_file->mapid == mapping){
       do_munmap(map_file);
 
       file_close(map_file->file);
@@ -456,16 +446,13 @@ void do_munmap(struct mmap_file* mmap_file){
 	struct vm_entry *vme;
 	void *physical_address;
 
-	for(element = list_begin(vm_list); element != list_end(vm_list); element = list_next(element))
-	{
+	for(element = list_begin(vm_list); element != list_end(vm_list); element = list_next(element)){
 		vme = list_entry(element, struct vm_entry, mmap_elem);
 
-		if(vme->is_loaded == true)
-		{
+		if(vme->is_loaded){
 			physical_address = pagedir_get_page(cur->pagedir, vme->vaddr);
 
-			if(pagedir_is_dirty(cur->pagedir, vme->vaddr) == true)
-			{
+			if(pagedir_is_dirty(cur->pagedir, vme->vaddr)){
 				lock_acquire(&file_lock);
 				file_write_at(vme->file, vme->vaddr, vme->read_bytes, vme->offset);
 				lock_release(&file_lock);
