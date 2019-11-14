@@ -160,7 +160,7 @@ page_fault (struct intr_frame *f)
   struct vm_entry *vme = find_vme(fault_addr);
   bool load = false;
   if(vme){
-    load = handle_mm_fault(vme); //handle_mm_fault 구현 해야 됨
+    load = handle_mm_fault(vme);
 //    if((vme->is_loaded) == false)
 //      printf("fault_addr is not loaded on physical memory(page fault)\n");
   }
