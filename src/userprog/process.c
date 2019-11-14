@@ -201,6 +201,11 @@ process_exit (void)
 
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
+  for(int i=2; i<cur->next_fd; i++)
+    my_close(i);
+  palloc_free_page(cur->fd);
+
+  munmap(CLOSE_ALL);
   vm_destroy(&cur->vm);
   pd = cur->pagedir;
   if (pd != NULL)
@@ -617,6 +622,7 @@ bool handle_mm_fault(struct vm_entry *vme){
     return false;
   switch(vme->type){
     case VM_BIN:
+    case VM_FILE:
       if(!load_file(kaddr, vme) || !install_page(vme->vaddr, kaddr, vme->writable)){
         palloc_free_page(kaddr);
         return false;

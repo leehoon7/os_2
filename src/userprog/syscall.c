@@ -353,42 +353,37 @@ void check_valid_string(const void *str, void *esp){
 }
 
 int mmap(int fd, void *addr){
-  struct thread *cur = thread_current();
-  struct mmap_file *mmap_file_entry;
-  struct vm_entry *vme;
-  struct file *mmap_file;
-  uint32_t file_len;
   int32_t offset = 0;
   void *virtual_address = addr;
-  size_t page_read_bytes;
-  size_t page_zero_bytes;
 
   if((uint32_t)addr%PGSIZE != 0 || addr == NULL)
     return -1;
-  mmap_file_entry = malloc(sizeof(struct mmap_file));
+  struct mmap_file* mmap_file_entry = malloc(sizeof(struct mmap_file));
   if(mmap_file_entry == NULL)
     return -1;
 
-  mmap_file = file_reopen(process_get_file(fd));
+  struct file *mmap_file = file_reopen(process_get_file(fd));
   if(mmap_file == NULL){
     printf("File reopen fail!\n");
     return -1;
   }
+
+  struct thread *cur = thread_current();
   cur->mapid += 1;
   mmap_file_entry->mapid = cur->mapid;
 
   list_init(&(mmap_file_entry->vme_list));
 
   mmap_file_entry->file = mmap_file;
-  file_len = file_length(mmap_file);
+  uint32_t file_len = file_length(mmap_file);
 
   while(file_len > 0){
-    vme = malloc(sizeof(struct vm_entry));
+      struct vm_entry *vme = malloc(sizeof(struct vm_entry));
     if(vme == NULL)
       return -1;
 
-    page_read_bytes = file_len < PGSIZE ? file_len : PGSIZE;
-    page_zero_bytes = PGSIZE - page_read_bytes;
+    size_t page_read_bytes = file_len < PGSIZE ? file_len : PGSIZE;
+    size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
     vme->type      = VM_FILE;
     vme->vaddr     = virtual_address;
@@ -422,7 +417,7 @@ void munmap(mapid_t mapid){
   for(element = list_begin(&cur->mmap_list) ; element != list_end(&cur->mmap_list) ; element = list_next(element)){
     map_file = list_entry(element, struct mmap_file, elem);
 
-    if(mapping == CLOSE_ALL || map_file->mapid == mapping){
+    if(mapid == CLOSE_ALL || map_file->mapid == mapid){
       do_munmap(map_file);
 
       file_close(map_file->file);
@@ -432,7 +427,7 @@ void munmap(mapid_t mapid){
       element = tmp;
 
       free(map_file);
-      if(mapping != CLOSE_ALL)
+      if(mapid != CLOSE_ALL)
         break;
     }
   }
