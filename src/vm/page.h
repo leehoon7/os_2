@@ -34,7 +34,7 @@ struct mmap_file {
   struct file* file;
   struct list_elem elem;
   struct list vme_list;
-}
+};
 
 void vm_init(struct hash *vm);
 static unsigned vm_hash_func(const struct hash_elem *e, void *aux);
