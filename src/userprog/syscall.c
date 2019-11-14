@@ -389,7 +389,7 @@ int mmap(int fd, void *addr){
     vme->vaddr     = virtual_address;
     vme->writable  = true;
     vme->is_loaded = false;
-    vme->pinned    = false;
+//    vme->pinned    = false;
     vme->file      = mmap_file;
     vme->offset    = offset;
     vme->read_bytes= page_read_bytes;

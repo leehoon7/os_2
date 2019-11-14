@@ -17,6 +17,7 @@
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "userprog/syscall.h"
 //#include "vm/page.h"
 
 static thread_func start_process NO_RETURN;
@@ -201,7 +202,7 @@ process_exit (void)
 
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
-  for(int i=2; i<cur->next_fd; i++)
+  for(int i=2; i< 128; i++)
     my_close(i);
   palloc_free_page(cur->fd);
 
