@@ -22,6 +22,7 @@
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
 static void push_argument (char *file_name, void **esp);
+bool handle_mm_fault(struct vm_entry *vme);
 /* Starts a new thread running a user program loaded from
    FILENAME.  The new thread may be scheduled (and may even exit)
    before process_execute() returns.  Returns the new process's
@@ -605,4 +606,31 @@ install_page (void *upage, void *kpage, bool writable)
      address, then map our page there. */
   return (pagedir_get_page (t->pagedir, upage) == NULL
           && pagedir_set_page (t->pagedir, upage, kpage, writable));
+}
+
+bool handle_mm_fault(struct vm_entry *vme){
+  uint8_t *kaddr = palloc_get_page(PAL_USER);
+  vme->pinned = true;
+  if(vme->is_loaded)
+    return false;
+  if(!kaddr)
+    retrun false;
+  switch(vme->type){
+    case VM_BIN:
+      if(!load_file(kaddr, vme) || !install_page(vme->vaddr, kaddr, vme->writable)){
+        palloc_free_page(kaddr);
+        return false;
+      }
+      break;
+
+    default:
+      return false;
+  }
+  vme->is_loaded = true;
+  return true;
+  // else if(vme->type == VM_FILE && !load_file(kaddr,vme)){
+  //   printf("an error occurred loading file at handle_mm_fault\n");
+  //   palloc_free_page(kaddr);
+  //   return false;
+  // }
 }
