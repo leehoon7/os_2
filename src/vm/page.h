@@ -8,6 +8,7 @@
 #define VM_FILE 1
 #define VM_ANON 2
 
+typedef int mapid_t;
 
 struct vm_entry{
   uint8_t type;
