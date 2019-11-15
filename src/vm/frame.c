@@ -34,3 +34,43 @@ void del_page_from_lru_list(struct page* page){
     }
   }
 }
+
+struct page* alloc_page(enum palloc_flags flags){
+  if(!flags && PAL_USER)
+    return NULL;
+
+  void *kaddr = palloc_get_page(flags);
+  // while(kaddr == NULL){
+  //   try_to_free_pages();
+  //   kaddr = palloc_get_page(flags);
+  // }
+
+  struct page *new_pg = malloc(sizeof(struct page));
+
+  if(new_pg == NULL){
+    palloc_free_page(kaddr);
+    return NULL;
+  }
+  new_pg->kaddr = kaddr;
+  new_pg->thread = thread_current();
+  add_page_to_lru_list(new_pg);
+  return new_pg;
+}
+
+void free_page(void *kaddr){
+  lock_acquire(&lru_list_lock);
+  for(struct list_elem elem = list_begin(&lru_list); elem != list_end(&lru_list); elem = list_next(elem)){
+    struct *page pg = list_entry(elem, struct page, kaddr);
+    if(pg->kdaar == kaddr){
+      __free_page(pg);
+      break;
+    }
+  }
+  lock_release(&lru_list_lock);
+}
+
+void __free_page(struct page* page){
+  palloc_free_page(page->kaddr);
+  del_page_from_lru_list(page);
+  free(page);
+}
