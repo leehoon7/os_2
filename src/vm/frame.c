@@ -1,6 +1,6 @@
-#include <page.h>
+#include "vm/frame.h"
 #include <list.h>
-#include <synch.h>
+#include "threads/synch.h"
 
 struct list lru_list;
 struct lock lru_list_lock; // add, del 할때 lock 걸어야 할거같음!
@@ -16,7 +16,7 @@ void add_page_to_lru_list(struct page* page){
   if(page != NULL){
     lock_acquire(&lru_list_lock);
 
-    list_push_back (lru_list, &(page->lru));
+    list_push_back (&lru_list, &(page->lru));
 
     lock_release(&lru_list_lock);
   }
