@@ -74,3 +74,25 @@ void __free_page(struct page* page){
   del_page_from_lru_list(page);
   free(page);
 }
+
+static struct list_elem* get_next_lru_clock(void){
+  struct list_elem *elem;
+  if(lru_clock == NULL){
+    elem = list_begin(&lru_list);
+    if(elem != list_end(&lru_list)){
+      lru_clock = list_entry(elem, struct page, lru);
+      return elem;
+    }
+    else
+      return NULL;
+  }
+  elem = list_next(&lru_clock->lru);
+  if(elem == list_end(&lru_list)){
+    if(&lru_clock->lru == list_begin(&lru_list))
+      return NULL;
+    else
+      elem = list_begin(&lru_list);
+  }
+  lru_clock = list_entry(elem, struct page, lru);
+  return elem;
+}
