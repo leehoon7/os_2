@@ -14,6 +14,7 @@ static long long page_fault_cnt;
 static void kill (struct intr_frame *);
 static void page_fault (struct intr_frame *);
 
+bool verify_stack(int32_t addr, void *sp);
 /* Registers handlers for interrupts that can be caused by user
    programs.
 
@@ -161,18 +162,25 @@ page_fault (struct intr_frame *f)
   bool load = false;
   if(vme){
     load = handle_mm_fault(vme);
+    if(!load)
+      my_exit(-1);
 //    if((vme->is_loaded) == false)
 //      printf("fault_addr is not loaded on physical memory(page fault)\n");
   }
+  else if(!verify_stack(int32_t fault_addr, f->esp))
+    my_exit(-1);
+  else
+    expand_stack(fault_addr);
+    return;
 
-  if(!load){
-    printf ("Page fault at %p: %s error %s page in %s context.\n",
-            fault_addr,
-            not_present ? "not present" : "rights violation",
-            write ? "writing" : "reading",
-            user ? "user" : "kernel");
-    kill(f); //my_exit(-1)?
-  }
+  // if(!load){
+  //   printf ("Page fault at %p: %s error %s page in %s context.\n",
+  //           fault_addr,
+  //           not_present ? "not present" : "rights violation",
+  //           write ? "writing" : "reading",
+  //           user ? "user" : "kernel");
+  //   kill(f); //my_exit(-1)?
+  // }
   // if(!user || is_kernel_vaddr(fault_addr) || not_present){
   //   my_exit(-1);
   // }
@@ -186,4 +194,11 @@ page_fault (struct intr_frame *f)
   //         user ? "user" : "kernel");
   // my_exit(-1);
   //kill (f);
+}
+
+bool verify_stack(int32_t addr, void *sp){
+  if (is_user_vaddr(addr) && sp-addr <= 32 && 0xC0000000UL - addr <= 8*1024*1024)
+    return true;
+  else
+    return handle_mm_fault(find_vme(addr));
 }
