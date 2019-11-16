@@ -1,3 +1,3 @@
-#include <page.h>
+#include "vm/page.h"
 #include <list.h>
-#include <synch.h>
+#include "threads/synch.h"

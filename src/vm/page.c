@@ -13,6 +13,8 @@
 #include "threads/synch.h"
 #include "lib/kernel/list.h"
 
+static void destruct(struct hash_elem *e, void *aux UNUSED);
+
 void vm_init(struct hash *vm){
   hash_init(vm, vm_hash_func, vm_less_func, NULL);
 }

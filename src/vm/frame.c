@@ -59,9 +59,9 @@ struct page* alloc_page(enum palloc_flags flags){
 
 void free_page(void *kaddr){
   lock_acquire(&lru_list_lock);
-  for(struct list_elem elem = list_begin(&lru_list); elem != list_end(&lru_list); elem = list_next(elem)){
-    struct *page pg = list_entry(elem, struct page, kaddr);
-    if(pg->kdaar == kaddr){
+  for(struct list_elem *elem = list_begin(&lru_list); elem != list_end(&lru_list); elem = list_next(elem)){
+    struct page *pg = list_entry(elem, struct page, kaddr);
+    if(pg->kaddr == kaddr){
       __free_page(pg);
       break;
     }
