@@ -24,6 +24,8 @@ static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
 static void push_argument (char *file_name, void **esp);
 bool handle_mm_fault(struct vm_entry *vme);
+bool expand_stack(void *addr);
+bool verify_stack(int32_t addr, void *sp);
 /* Starts a new thread running a user program loaded from
    FILENAME.  The new thread may be scheduled (and may even exit)
    before process_execute() returns.  Returns the new process's
@@ -645,4 +647,32 @@ bool handle_mm_fault(struct vm_entry *vme){
   //   palloc_free_page(kaddr);
   //   return false;
   // }
+}
+
+bool expand_stack(void *addr){
+  void *upage = pg_round_down (addr);
+
+  struct vm_entry *vme = (struct vm_entry *)malloc(sizeof(struct vm_entry));
+  if (!vme)
+    return false;
+
+  struct page* kpage = alloc_page (PAL_USER | PAL_ZERO);
+  if (kpage){
+    kpage->vme = vme;
+    add_page_to_lru_list (kpage);
+
+    if (!install_page (upage, kpage->kaddr, true)){
+      free_page_kaddr (kpage);
+      free (vme);
+      return false;
+    }
+
+    memset (kpage->vme, 0, sizeof (struct vm_entry));
+    kpage->vme->type = VM_ANON;
+    kpage->vme->vaddr = upage;
+    kpage->vme->writable = true;
+    kpage->vme->is_loaded = true;
+
+    insert_vme (&thread_current ()->vm, kpage->vme);
+  }
 }
