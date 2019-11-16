@@ -465,8 +465,8 @@ void do_munmap(struct mmap_file* mmap_file){
 			}
 
 			pagedir_clear_page(cur->pagedir, vme->vaddr);
-
-			palloc_free_page(physical_address);
+      free_page(physical_address);
+			//palloc_free_page(physical_address);
 		}
 
 		tmp = list_prev(element);
