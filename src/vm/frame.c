@@ -97,7 +97,7 @@ static struct list_elem* get_next_lru_clock(void){
   return elem;
 }
 
-void try_to_free_pages(enum palloc_flags flags){
+void try_to_free_pages(void){
   lock_acquire(&lru_list_lock);
   // 이부분 빼도 될 것 같음.
   if(list_empty(&lru_list)){
