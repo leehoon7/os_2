@@ -647,15 +647,14 @@ bool handle_mm_fault(struct vm_entry *vme){
       break;
     case VM_ANON:
       swap_in(vme->swap_slot, new_page->kaddr);
-      if(install_page(vme->vaddr,new_page->kaddr, vme->writable) == false)
-    	{
-    		free_page(new_page->kaddr);
-    		return false;
-    	}
 			break;
-
     default:
       return false;
+  }
+  if(install_page(vme->vaddr,new_page->kaddr, vme->writable) == false)
+  {
+    free_page(new_page->kaddr);
+    return false;
   }
   vme->is_loaded = true;
   return true;
