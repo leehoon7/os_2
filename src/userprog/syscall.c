@@ -10,6 +10,8 @@
 #include "threads/vaddr.h" // for check_address : is_user_vaddr
 #include "filesys/filesys.h" // for SYS_CREATE, SYS_REMOVE
 #include "vm/page.h"
+#include "vm/frame.h"
+#include "vm/swap.h"
 static void syscall_handler (struct intr_frame *);
 
 struct lock file_lock;
