@@ -36,4 +36,5 @@ size_t swap_out(void* kaddr){
     block_write(swap_block, used_index * SECTORS_PER_PAGE + i, kaddr + (BLOCK_SECTOR_SIZE * i));
   }
   bitmap_set(swap_bitmap, used_index, false);
+  return used_index;
 }
