@@ -572,7 +572,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 static bool
 setup_stack (void **esp)
 {
-  uint8_t *kpage;
+  struct page *kpage;
   bool success = false;
 
   //kpage = palloc_get_page (PAL_USER | PAL_ZERO);
@@ -640,13 +640,18 @@ bool handle_mm_fault(struct vm_entry *vme){
   switch(vme->type){
     case VM_BIN:
     case VM_FILE:
+<<<<<<< HEAD
       if(!load_file(new_page->kaddr, vme) || !install_page(vme->vaddr, kaddr, vme->writable)){
         palloc_free_page(kaddr);
+=======
+      if(!load_file(new_page->kaddr, vme) || !install_page(vme->vaddr, new_page->kaddr, vme->writable)){
+        free_page(new_page->kaddr);
+>>>>>>> 1c7a280af2e7c3db2d0146e8a8e55d694bb59333
         return false;
       }
       break;
     case VM_ANON:
-			swap_in(vme->swap_slot, new_page->kaddr);
+      swap_in(vme->swap_slot, new_page->kaddr);
       if(install_page(vme->vaddr,new_page->kaddr, vme->writable) == false)
     	{
     		free_page(new_page->kaddr);
