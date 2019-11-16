@@ -17,14 +17,14 @@ void swap_init(void){
 
 void swap_in(size_t used_index, void* kaddr){
   // 현재 쓰이고 있으면 true, 안쓰이고 있으면 false
-  bool using_now = bitmap_test(swap_map, used_index);
+  bool using_now = bitmap_test(swap_bitmap, used_index);
   if(using_now){
     return;
   }
 
   int i;
   for(i = 0; i < SECTORS_PER_PAGE; i++){
-    block_read(swap_block, used_index * SECTORS_PER_PAGE + i, page + (BLOCK_SECTOR_SIZE * i));
+    block_read(swap_block, used_index * SECTORS_PER_PAGE + i, kaddr + (BLOCK_SECTOR_SIZE * i));
   }
   bitmap_set(swap_bitmap, used_index, true);
 }
@@ -33,7 +33,7 @@ size_t swap_out(void* kaddr){
   size_t used_index = bitmap_scan (swap_bitmap, 0, 1, true);
   int i;
   for(i = 0; i < SECTORS_PER_PAGE; i++){
-    block_write(swap_block, used_index * SECTORS_PER_PAGE + i, page + (BLOCK_SECTOR_SIZE * i));
+    block_write(swap_block, used_index * SECTORS_PER_PAGE + i, kaddr + (BLOCK_SECTOR_SIZE * i));
   }
   bitmap_set(swap_bitmap, used_index, false);
 }
