@@ -648,7 +648,6 @@ bool handle_mm_fault(struct vm_entry *vme){
     case VM_ANON:
       swap_in(vme->swap_slot, new_page->kaddr);
 			break;
-
     default:
       return false;
   }
