@@ -110,6 +110,9 @@ void try_to_free_pages(enum palloc_flags flags){
       break;
     }
     struct page *lru_page = list_entry(e, struct page, lru);
+    if(lru_page->vme->pinned == true){
+      continue;
+    }
     struct thread *page_thread = lru_page->thread;
     if(pagedir_is_accessed(page_thread->pagedir, lru_page->vme->vaddr)){
       pagedir_set_accessed(page_thread->pagedir, lru_page->vme->vaddr, false);
