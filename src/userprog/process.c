@@ -640,13 +640,8 @@ bool handle_mm_fault(struct vm_entry *vme){
   switch(vme->type){
     case VM_BIN:
     case VM_FILE:
-<<<<<<< HEAD
-      if(!load_file(new_page->kaddr, vme) || !install_page(vme->vaddr, kaddr, vme->writable)){
-        palloc_free_page(kaddr);
-=======
       if(!load_file(new_page->kaddr, vme) || !install_page(vme->vaddr, new_page->kaddr, vme->writable)){
         free_page(new_page->kaddr);
->>>>>>> 1c7a280af2e7c3db2d0146e8a8e55d694bb59333
         return false;
       }
       break;

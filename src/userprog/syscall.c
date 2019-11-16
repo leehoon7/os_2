@@ -159,7 +159,7 @@ syscall_handler (struct intr_frame *f UNUSED)
     check_address(f->esp+4, esp);
     munmap(mapid);
   }
-  struct vm_entry *vme = find_vme(vaddr);
+  struct vm_entry *vme = find_vme(f->esp);
   if(vme)
     vme->pinned = false;
 }
