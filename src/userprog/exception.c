@@ -162,8 +162,10 @@ page_fault (struct intr_frame *f)
   bool load = false;
   if(vme){
     load = handle_mm_fault(vme);
-    if(!load)
-      my_exit(-1);
+    if(vme->is_loaded){
+      vme->pinned = false;
+      load = true;
+    }
 //    if((vme->is_loaded) == false)
 //      printf("fault_addr is not loaded on physical memory(page fault)\n");
   }

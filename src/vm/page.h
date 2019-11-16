@@ -14,8 +14,8 @@ struct vm_entry{
   uint8_t type;
   void *vaddr;
   bool writable;
-
   bool is_loaded;
+  bool pinned;
   struct file* file;
 
   struct list_elem mmap_elem;
