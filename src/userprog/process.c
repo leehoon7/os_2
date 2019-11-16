@@ -581,7 +581,7 @@ setup_stack (void **esp)
   kpage = alloc_page (PAL_USER | PAL_ZERO);
   if (kpage != NULL)
     {
-      success = install_page (pg_round_down(((uint8_t *) PHYS_BASE) - PGSIZE), kpage->kaddr, true);
+      success = install_page (pg_round_down(((uint8_t *) PHYS_BASE) - PGSIZE), kpage, true);
       if (success)
         *esp = PHYS_BASE;
       else
