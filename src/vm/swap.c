@@ -28,3 +28,12 @@ void swap_in(size_t used_index, void* kaddr){
   }
   bitmap_set(swap_bitmap, used_index, true);
 }
+
+size_t swap_out(void* kaddr){
+  size_t used_index = bitmap_scan (swap_bitmap, 0, 1, true);
+  int i;
+  for(i = 0; i < SECTORS_PER_PAGE; i++){
+    block_write(swap_block, used_index * SECTORS_PER_PAGE + i, page + (BLOCK_SECTOR_SIZE * i));
+  }
+  bitmap_set(swap_bitmap, used_index, false);
+}
