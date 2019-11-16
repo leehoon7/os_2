@@ -25,18 +25,18 @@ void add_page_to_lru_list(struct page* page){
 void del_page_from_lru_list(struct page* page){
   if(page != NULL){
     if(lru_clock == page){
-      lock_acquire(&lru_list_lock);
 
       lru_clock = list_entry(list_next(&(page->lru)), struct page, lru);
       list_remove(&(page->lru));
 
-      lock_release(&lru_list_lock);
+    }else{
+      list_remove(&page->lru);
     }
   }
 }
 
 struct page* alloc_page(enum palloc_flags flags){
-  if(!flags && PAL_USER)
+  if((flags & PAL_USER) == 0)
     return NULL;
 
   void *kaddr = palloc_get_page(flags);
@@ -116,6 +116,7 @@ void try_to_free_pages(enum palloc_flags flags){
     struct thread *page_thread = lru_page->thread;
     if(pagedir_is_accessed(page_thread->pagedir, lru_page->vme->vaddr)){
       pagedir_set_accessed(page_thread->pagedir, lru_page->vme->vaddr, false);
+      continue;
     }
     if(pagedir_is_dirty(page_thread->pagedir, lru_page->vme->vaddr) || lru_page->vme->type == VM_ANON)
 		{
