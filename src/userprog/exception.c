@@ -167,7 +167,7 @@ page_fault (struct intr_frame *f)
 //    if((vme->is_loaded) == false)
 //      printf("fault_addr is not loaded on physical memory(page fault)\n");
   }
-  else if(!verify_stack(int32_t fault_addr, f->esp))
+  else if(!verify_stack((int32_t) fault_addr, f->esp))
     my_exit(-1);
   else
     expand_stack(fault_addr);
