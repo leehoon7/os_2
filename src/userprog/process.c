@@ -601,8 +601,6 @@ setup_stack (void **esp)
   vme->pinned = true;
   kpage->vme = vme;
 
-  kpage -> vme = vme;
-
   success = insert_vme(&thread_current()->vm, vme);
 
   return success;
@@ -642,7 +640,7 @@ bool handle_mm_fault(struct vm_entry *vme){
   switch(vme->type){
     case VM_BIN:
     case VM_FILE:
-      if(!load_file(kaddr, vme) || !install_page(vme->vaddr, kaddr, vme->writable)){
+      if(!load_file(new_page->kaddr, vme) || !install_page(vme->vaddr, kaddr, vme->writable)){
         palloc_free_page(kaddr);
         return false;
       }
@@ -694,7 +692,7 @@ bool expand_stack(void *addr){
     kpage->vme->pinned = true;
 
     if(!insert_vme (&thread_current ()->vm, kpage->vme)){
-      free_page(stack_page);
+      free_page(kpage);
       free(vme);
       return false;
     }
