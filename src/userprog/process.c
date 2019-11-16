@@ -575,19 +575,22 @@ setup_stack (void **esp)
   uint8_t *kpage;
   bool success = false;
 
-  kpage = palloc_get_page (PAL_USER | PAL_ZERO);
+  //kpage = palloc_get_page (PAL_USER | PAL_ZERO);
+  kpage = alloc_page (PAL_USER | PAL_ZERO);
   if (kpage != NULL)
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success)
         *esp = PHYS_BASE;
       else
-        palloc_free_page (kpage);
+        free_page (kpage);
+        //palloc_free_page (kpage);
     }
 
   struct vm_entry *vme;
   vme = malloc(sizeof(struct vm_entry));
   if(vme == NULL){
+    free_page(kpage);
     return false;
   }
   void *temp_vad = ((uint8_t *) PHYS_BASE) - PGSIZE;
@@ -597,6 +600,8 @@ setup_stack (void **esp)
   vme->type = VM_ANON;
   vme->pinned = true;
   kpage->vme = vme;
+
+  kpage -> vme = vme;
 
   success = insert_vme(&thread_current()->vm, vme);
 
@@ -624,11 +629,15 @@ install_page (void *upage, void *kpage, bool writable)
 }
 
 bool handle_mm_fault(struct vm_entry *vme){
-  uint8_t *kaddr = palloc_get_page(PAL_USER);
-  vme->pinned = true;
-  if(vme->is_loaded)
+  struct page *new_page = alloc_page(PAL_USER);
+  new_page->vme = vme;
+  //uint8_t *kaddr = palloc_get_page(PAL_USER);
+ vme->pinned = true;
+  if(vme->is_loaded){
+    free_page(new_page);
     return false;
-  if(!kaddr)
+  }
+  if(new_page == NULL)
     return false;
   switch(vme->type){
     case VM_BIN:
@@ -638,6 +647,14 @@ bool handle_mm_fault(struct vm_entry *vme){
         return false;
       }
       break;
+    case VM_ANON:
+			swap_in(vme->swap_slot, new_page->kaddr);
+      if(install_page(vme->vaddr,new_page->kaddr, vme->writable) == false)
+    	{
+    		free_page(new_page->kaddr);
+    		return false;
+    	}
+			break;
 
     default:
       return false;
