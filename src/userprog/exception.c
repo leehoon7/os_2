@@ -196,8 +196,8 @@ page_fault (struct intr_frame *f)
 }
 
 bool verify_stack(int32_t addr, void *sp){
-  if (is_user_vaddr(addr) && esp-addr <= 32 && 0xC0000000UL - addr <= 8*1024*1024)
+  if (is_user_vaddr(addr) && sp-addr <= 32 && 0xC0000000UL - addr <= 8*1024*1024)
     return true;
   else
-    handle_mm_fault()
+    return handle_mm_fault(find_vme(fault_addr));
 }
