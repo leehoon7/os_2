@@ -662,7 +662,7 @@ bool expand_stack(void *addr){
     add_page_to_lru_list (kpage);
 
     if (!install_page (upage, kpage->kaddr, true)){
-      free_page_kaddr (kpage);
+      free_page (kpage);
       free (vme);
       return false;
     }
