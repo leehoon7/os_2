@@ -524,8 +524,8 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       vme->type = VM_BIN;
       vme->vaddr = upage;
       vme->writable = writable;
-
       vme->is_loaded = false;
+      vme->pinned = false;
       vme->file = reopen_file;
 
       vme->offset = ofs;
@@ -591,10 +591,12 @@ setup_stack (void **esp)
     return false;
   }
   void *temp_vad = ((uint8_t *) PHYS_BASE) - PGSIZE;
-  vme -> vaddr = pg_round_down(temp_vad);
-  vme -> is_loaded = true;
-  vme -> writable = true;
-  vme -> type = VM_ANON;
+  vme->vaddr = pg_round_down(temp_vad);
+  vme->is_loaded = true;
+  vme->writable = true;
+  vme->type = VM_ANON;
+  vme->pinned = true;
+  kpage->vme = vme;
 
   success = insert_vme(&thread_current()->vm, vme);
 
@@ -623,7 +625,7 @@ install_page (void *upage, void *kpage, bool writable)
 
 bool handle_mm_fault(struct vm_entry *vme){
   uint8_t *kaddr = palloc_get_page(PAL_USER);
-//  vme->pinned = true;
+  vme->pinned = true;
   if(vme->is_loaded)
     return false;
   if(!kaddr)
@@ -672,7 +674,16 @@ bool expand_stack(void *addr){
     kpage->vme->vaddr = upage;
     kpage->vme->writable = true;
     kpage->vme->is_loaded = true;
+    kpage->vme->pinned = true;
 
-    insert_vme (&thread_current ()->vm, kpage->vme);
+    if(!insert_vme (&thread_current ()->vm, kpage->vme)){
+      free_page(stack_page);
+      free(vme);
+      return false;
+    }
+
+    if(intr_context())
+      vme->pinned = false;
+    return true;
   }
 }
