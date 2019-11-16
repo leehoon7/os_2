@@ -3,6 +3,7 @@
 
 #include "vm/page.h"
 #include "threads/palloc.h"
+#include "threads/thread.h"
 
 void lru_list_init(void);
 void add_page_to_lru_list(struct page* page);
